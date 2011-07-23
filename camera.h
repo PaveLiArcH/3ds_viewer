@@ -2,7 +2,7 @@
 
 #include "glee.h"
 #include "glut.h"
-#include "glm-0.9.1/glm.hpp"
+#include "glm/glm.hpp"
 using namespace glm;
 
 #ifndef __camera_h__

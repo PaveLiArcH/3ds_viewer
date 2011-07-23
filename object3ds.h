@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 //glm
-#include "glm-0.9.1/glm.hpp"
+#include "glm/glm.hpp"
 //glut
 #include "glut.h"
 //self implemented

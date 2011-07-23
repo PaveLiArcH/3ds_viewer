@@ -81,7 +81,7 @@
     <ClInclude Include="3ds_info.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="GLee.h" />
-    <ClInclude Include="glm-0.9.1\glm.hpp" />
+    <ClInclude Include="glm\glm.hpp" />
     <ClInclude Include="GLUT.H" />
     <ClInclude Include="il\il.h" />
     <ClInclude Include="il\ilu.h" />

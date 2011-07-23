@@ -18,8 +18,8 @@
 #include "IL/ilu.h"
 #include "IL/ilut.h"
 //glm
-#include "glm-0.9.1/glm.hpp"
-//glut
+#include "glm/glm.hpp"
+//glut (freeglut now)
 #include "glut.h"
 //self implemented
 #include "camera.h"

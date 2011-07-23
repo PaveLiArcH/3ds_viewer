@@ -65,9 +65,6 @@
     <ClInclude Include="vkscancodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="glm-0.9.1\glm.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="il\il.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -75,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="il\ilut.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="glm\glm.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,4 +1,4 @@
-#include "glm-0.9.1\glm.hpp"
+#include "glm\glm.hpp"
 
 using namespace glm;
 

@@ -77,6 +77,9 @@
     <ClInclude Include="glm\glm.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="3DS_spec.txt">
@@ -87,6 +90,9 @@
     </None>
     <None Include="3ds-info.txt">
       <Filter>Help Files</Filter>
+    </None>
+    <None Include="libconfig\libconfig.h++">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
 </Project>

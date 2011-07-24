@@ -1,6 +1,6 @@
 //#define _HAS_ITERATOR_DEBUGGING 0
 // catch mem leaks
-#include <vld.h>
+//#include <vld.h>
 //Glee
 #include "glee.h"
 //VC++
@@ -23,7 +23,10 @@
 #include "glm/glm.hpp"
 //glut (freeglut now)
 #include "glut.h"
+//libconfig
+#include "libconfig/libconfig.h++"
 //self implemented
+#include "main.h"
 #include "camera.h"
 #include "vkscancodes.h"
 #include "vertex.h"
@@ -35,10 +38,12 @@
 
 using namespace glm;
 using namespace std;
+using namespace libconfig;
 
 #define surfaceSpace 5
 #define halfWi 1
 
+//const string cfgPath="config.cfg";
 int frame=0,time,timebase=0,w,h,delayPerFrames=20,filterMode=0,g_nMaxAnisotropy;
 char s[20];
 bool isDrawingFps=false, isDrawingBack=false;
@@ -187,7 +192,8 @@ texture surfaceTex;
 
 vector<object3DS *> objects;
 bool newOGL=false,hasVBO=false,hasFragmentShader=false,hasVertexShader=false;
-camera cam;
+Config *cfg;
+camera *cam;
 
 shader modelShader,planeShader;
 material planeMaterial=material(ambMat,difMat,speMat,0,64.0f);
@@ -288,9 +294,9 @@ void display (void)
 	glLoadIdentity();
 
 	//gluLookAt(0,30,20,0,0,0,0,1,0);
-	glMultMatrixd(cam.getOrientation());
+	glMultMatrixd(cam->getOrientation());
 	// позиция камеры
-	glMultMatrixd(cam.getPosition());
+	glMultMatrixd(cam->getPosition());
 
 	firstLight.use();
 	secondLight.use(GL_LIGHT1);
@@ -387,27 +393,27 @@ void processNormalKeys(unsigned char key, int x, int y)
 		}
 		case VK_D:
 		{
-			cam.moveRight();
+			cam->moveRight();
 			break;
 		}
 		case VK_A:
 		{
-			cam.moveLeft();
+			cam->moveLeft();
 			break;
 		}
 		case VK_W:
 		{
-			cam.moveUp();
+			cam->moveUp();
 			break;
 		}
 		case VK_S:
 		{
-			cam.moveDown();
+			cam->moveDown();
 			break;
 		}
 		case VK_R:
 		{
-			cam.resetCamera();
+			cam->resetCamera();
 			break;
 		}
 		case VK_T:
@@ -419,12 +425,12 @@ void processNormalKeys(unsigned char key, int x, int y)
 	{
 		case '+':
 		{
-			cam.moveForward();
+			cam->moveForward();
 			break;
 		}
 		case '-':
 		{
-			cam.moveBack();
+			cam->moveBack();
 			break;
 		}
 		case '1':
@@ -450,9 +456,9 @@ void processSpecialKeys(int key, int x, int y)
 		case GLUT_KEY_F2 : 
 				isDrawingFps=!isDrawingFps; break;
 		case GLUT_KEY_F5 : 
-			cam.loadCamera(); break;
+			cam->loadCamera(cfg); break;
 		case GLUT_KEY_F6 : 
-			cam.saveCamera(); break;
+			cam->saveCamera(); break;
 		case GLUT_KEY_PAGE_DOWN:
 		{
 			delayPerFrames=delayPerFrames<100?delayPerFrames+5:delayPerFrames;
@@ -465,22 +471,22 @@ void processSpecialKeys(int key, int x, int y)
 		}
 		case GLUT_KEY_LEFT:
 		{
-			cam.moveRight();
+			cam->moveRight();
 			break;
 		}
 		case GLUT_KEY_RIGHT:
 		{
-			cam.moveLeft();
+			cam->moveLeft();
 			break;
 		}
 		case GLUT_KEY_UP:
 		{
-			cam.moveUp();
+			cam->moveUp();
 			break;
 		}
 		case GLUT_KEY_DOWN:
 		{
-			cam.moveDown();
+			cam->moveDown();
 			break;
 		}
 	}
@@ -488,94 +494,134 @@ void processSpecialKeys(int key, int x, int y)
 
 bool loadObjects(vector<object3DS *> &objs)
 {
-	vertex center,tempVertex;
-	bool hasReaded=false;
-	wifstream configFile("config.ini", ios::in);
-	if (!configFile)
-	{
-		cerr<<"Config file unavailable"<<endl;
-		return false;
-	}
-	wstring tmp,file;
-	wchar_t c;
-	int kb,kc,kf,ks,kt,posBegin,posEnd;
-	GLfloat scale=1.0f,temp;
+	Setting &objects=cfg->lookup("application.objects");
+	int count=objects.getLength();
+	glActiveTexture(GL_TEXTURE0);
 	texture *tex=NULL;
-	object3DS *object=new object3DS();
-	while (!configFile.eof())
+	object3DS *object=NULL;
+	for (int i=0; i<count; i++)
 	{
-		tmp.clear();
-		configFile>>c;
-		while (!configFile.eof()&&(c!='\n'))
+		vertex _tempVertex;
+		string _tempStr;
+		objects[i]["color"].lookupValue("r",_tempVertex.color[0]);
+		objects[i]["color"].lookupValue("g",_tempVertex.color[1]);
+		objects[i]["color"].lookupValue("b",_tempVertex.color[2]);
+		objects[i]["position"].lookupValue("x",_tempVertex.coordinate[0]);
+		objects[i]["position"].lookupValue("y",_tempVertex.coordinate[1]);
+		objects[i]["position"].lookupValue("z",_tempVertex.coordinate[2]);
+		objects[i].lookupValue("texture",_tempStr);
+		tex=new texture();
+		object=new object3DS();
+		wchar_t *_tempBuf=new wchar_t[_tempStr.size()];
+		int _len=mbstowcs(_tempBuf,_tempStr.c_str(),_tempStr.size());
+		wstring _tempWStr(_tempBuf,_len);
+		delete []_tempBuf;
+		tex->load(_tempWStr,true,true,true);
+		objects[i].lookupValue("model",_tempStr);
+		_tempBuf=new wchar_t[_tempStr.size()];
+		_len=mbstowcs(_tempBuf,_tempStr.c_str(),_tempStr.size());
+		_tempWStr.clear();
+		_tempWStr=wstring(_tempBuf,_len);
+		delete []_tempBuf;
+		object->load(_tempWStr);
+		_tempWStr.clear();
+		object->setPosition(_tempVertex);
+		object->setScale(1.0f);
+		if (tex!=NULL)
 		{
-			tmp+=c;
-			configFile.get((wchar_t &)c);
+			object->copyTex(tex);
 		}
-		try
-		{
-			kb=swscanf(tmp.c_str(),L"V = (%f, %f, %f)", &tempVertex.coordinate[0], &tempVertex.coordinate[1], &tempVertex.coordinate[2]);
-			if (kb==3)
-			{
-				center.coordinate[0]=tempVertex.coordinate[0]; center.coordinate[1]=tempVertex.coordinate[1]; center.coordinate[2]=tempVertex.coordinate[2];
-			}
-			kc=swscanf(tmp.c_str(),L"C = (%f, %f, %f)", &tempVertex.color[0], &tempVertex.color[1], &tempVertex.color[2]);
-			if (kc==3)
-			{
-				center.color[0]=tempVertex.color[0]; center.color[1]=tempVertex.color[1]; center.color[2]=tempVertex.color[2];
-			}
-			kt=swscanf(tmp.c_str(),L"T = \"%c\"", &c);
-			if (kt==1)
-			{
-				posBegin=tmp.find(L"T = \"")+5;
-				posEnd=tmp.rfind(L'"');
-				file=tmp.substr(posBegin,posEnd-posBegin);
-				glActiveTexture(GL_TEXTURE0);
-				
-				if (tex)
-				{
-					delete tex;
-					tex=NULL;
-				};
-				tex=new texture();
-				tex->load(file,true,true,true);
-			}
-			ks=swscanf(tmp.c_str(),L"S = (%f)", &temp);
-			if (ks==1)
-			{
-				scale=temp;
-			};
-			kf=swscanf(tmp.c_str(),L"M = \"%c\"", &c);
-			if (kf==1)
-			{
-				posBegin=tmp.find(L"M = \"")+5;
-				posEnd=tmp.rfind(L'"');
-				file=tmp.substr(posBegin,posEnd-posBegin);
-				object->load(file);
-				object->setPosition(center);
-				object->setScale(scale);
-				if (tex!=NULL)
-				{
-					object->copyTex(tex);
-				}
-				tex=NULL;
-				objs.push_back(object);
-				//delete object;
-				object=new object3DS();
-				scale=1.0f;
-			}
-		}catch (...)
-		{
-		}
-	}
-	if (object)
-	{
-		delete object;
-	}
-	if (tex)
-	{
-		delete tex;
+		objs.push_back(object);
 	}
 	return true;
+	//vertex center,tempVertex;
+	//bool hasReaded=false;
+	//wifstream configFile("config.ini", ios::in);
+	//if (!configFile)
+	//{
+	//	cerr<<"Config file unavailable"<<endl;
+	//	return false;
+	//}
+	//wstring tmp,file;
+	//wchar_t c;
+	//int kb,kc,kf,ks,kt,posBegin,posEnd;
+	//GLfloat scale=1.0f,temp;
+	//texture *tex=NULL;
+	//object3DS *object=new object3DS();
+	//while (!configFile.eof())
+	//{
+	//	tmp.clear();
+	//	configFile>>c;
+	//	while (!configFile.eof()&&(c!='\n'))
+	//	{
+	//		tmp+=c;
+	//		configFile.get((wchar_t &)c);
+	//	}
+	//	try
+	//	{
+	//		kb=swscanf(tmp.c_str(),L"V = (%f, %f, %f)", &tempVertex.coordinate[0], &tempVertex.coordinate[1], &tempVertex.coordinate[2]);
+	//		if (kb==3)
+	//		{
+	//			center.coordinate[0]=tempVertex.coordinate[0]; center.coordinate[1]=tempVertex.coordinate[1]; center.coordinate[2]=tempVertex.coordinate[2];
+	//		}
+	//		kc=swscanf(tmp.c_str(),L"C = (%f, %f, %f)", &tempVertex.color[0], &tempVertex.color[1], &tempVertex.color[2]);
+	//		if (kc==3)
+	//		{
+	//			center.color[0]=tempVertex.color[0]; center.color[1]=tempVertex.color[1]; center.color[2]=tempVertex.color[2];
+	//		}
+	//		kt=swscanf(tmp.c_str(),L"T = \"%c\"", &c);
+	//		if (kt==1)
+	//		{
+	//			posBegin=tmp.find(L"T = \"")+5;
+	//			posEnd=tmp.rfind(L'"');
+	//			file=tmp.substr(posBegin,posEnd-posBegin);
+	//			glActiveTexture(GL_TEXTURE0);
+	//			
+	//			if (tex)
+	//			{
+	//				delete tex;
+	//				tex=NULL;
+	//			};
+	//			tex=new texture();
+	//			tex->load(file,true,true,true);
+	//		}
+	//		ks=swscanf(tmp.c_str(),L"S = (%f)", &temp);
+	//		if (ks==1)
+	//		{
+	//			scale=temp;
+	//		};
+	//		kf=swscanf(tmp.c_str(),L"M = \"%c\"", &c);
+	//		if (kf==1)
+	//		{
+	//			posBegin=tmp.find(L"M = \"")+5;
+	//			posEnd=tmp.rfind(L'"');
+	//			file=tmp.substr(posBegin,posEnd-posBegin);
+	//			object->load(file);
+	//			object->setPosition(center);
+	//			object->setScale(scale);
+	//			if (tex!=NULL)
+	//			{
+	//				object->copyTex(tex);
+	//			}
+	//			tex=NULL;
+	//			objs.push_back(object);
+	//			//delete object;
+	//			object=new object3DS();
+	//			scale=1.0f;
+	//		}
+	//	}catch (...)
+	//	{
+	//	}
+	//}
+	//if (object)
+	//{
+	//	delete object;
+	//}
+	//if (tex)
+	//{
+	//	delete tex;
+	//}
+	//return true;
 }
 
 void onExit()
@@ -585,6 +631,8 @@ void onExit()
 		delete objects[i];
 	}
 	objects.clear();
+	delete cam;
+	delete []cfg;
 }
 
 void main (int argc,char **argv)
@@ -605,12 +653,22 @@ void main (int argc,char **argv)
 	// устанавливаем обработчик выхода (для освобождения выделенной памяти)
 	atexit(onExit);
 	// переходим в полноэкранный режим
-	glutFullScreen();
+	//glutFullScreen();
+
+	cfg=new Config();
+	try
+	{
+		cfg->readFile(cfgPath.c_str());
+	} catch (...)
+	{
+		printf("Config doesn't parsed\n");
+	}
 
 	// очистка объектов
 	objects.clear();
+	cam=new camera();
 	// загрузка камеры
-	cam.loadCamera();
+	cam->loadCamera(cfg);
 	
 	hasVBO=glutExtensionSupported("GL_ARB_vertex_buffer_object")!=0; // check if VBO supported
 	hasFragmentShader=glutExtensionSupported("GL_ARB_fragment_shader")!=0; // check if fragment shader is supported

@@ -1,21 +1,27 @@
-#include "glm/glm.hpp"
-#include "camera.h"
+//VC++
 #include "stdio.h"
 #include <windows.h>
 #include <iostream>
 #include <fstream>
+//glm
+#include "glm/glm.hpp"
+//libconfig
+#include "libconfig/libconfig.h++"
+//self implemented
+#include "camera.h"
+#include "main.h"
 
 using namespace glm;
 using namespace std;
 
-camera::camera(vec3 newPosition, vec3 newViewPoint)
+camera::camera(vec3 newPosition, vec3 newViewPoint):cfg(NULL)
 {
 	viewPoint=newViewPoint;
 	position=newPosition;
 	applyCamera();
 }
 
-camera::camera()
+camera::camera():cfg(NULL)
 {
 	viewPoint=vec3(0,0,0);
 	position=vec3(0,30,20);
@@ -185,52 +191,35 @@ void camera::moveDown()
 	applyCamera();
 }
 
-bool camera::loadCamera()
+bool camera::loadCamera(Config *conf)
 {
-	ifstream configFile("config.ini", ios::in);
-	if (!configFile)
-	{
-		cerr<<"File unavailable"<<endl;
-		return false;
-	}
-	configFile.close();
-	try
-	{
-		char inBuf[80];
-		GetPrivateProfileStringA("camera","position","0.0 30.0 20.0",inBuf,80,".\\config.ini");
-		sscanf(inBuf,"%f %f %f",&position.x,&position.y,&position.z);
-		GetPrivateProfileStringA("camera","point","0 0 0",inBuf,80,".\\config.ini");
-		sscanf(inBuf,"%f %f %f",&viewPoint.x,&viewPoint.y,&viewPoint.z);
-	} catch(...)
-	{
-		cerr<<"Error while reading file"<<endl;
-		return false;
-	}
+	cfg=conf;
+	cfg->lookupValue("application.camera.position.x",position.x);
+	cfg->lookupValue("application.camera.position.y",position.y);
+	cfg->lookupValue("application.camera.position.z",position.z);
+	cfg->lookupValue("application.camera.point.x",viewPoint.x);
+	cfg->lookupValue("application.camera.point.y",viewPoint.y);
+	cfg->lookupValue("application.camera.point.z",viewPoint.z);
 	applyCamera();
 	return true;
 }
 
 bool camera::saveCamera()
 {
-	char outBuf[80];
-	try
+	if (cfg)
 	{
-		SetFileAttributesA("config.ini",FILE_ATTRIBUTE_NORMAL);
-	} catch (...)
-	{
-			cerr<<"\nFile unavailable"<<endl;
-			return false;
-	}
-	try
-	{
-		sprintf(outBuf,"%f %f %f",position.x,position.y,position.z);
-		WritePrivateProfileStringA("camera","position",outBuf,".\\config.ini");
-		sprintf(outBuf,"%f %f %f",viewPoint.x,viewPoint.y,viewPoint.z);
-		WritePrivateProfileStringA("camera","point",outBuf,".\\config.ini");
-	} catch(...)
-	{
-		cerr<<"Error while writing file"<<endl;
-		return false;
+		cfg->lookup("application.camera.position.x")=position.x;
+		cfg->lookup("application.camera.position.y")=position.y;
+		cfg->lookup("application.camera.position.z")=position.z;
+		cfg->lookup("application.camera.point.x")=viewPoint.x;
+		cfg->lookup("application.camera.point.y")=viewPoint.y;
+		cfg->lookup("application.camera.point.z")=viewPoint.z;
+		char *_temp=new char[cfgPath.size()+1];
+		memcpy(_temp,cfgPath.c_str(),cfgPath.size());
+		_temp[cfgPath.size()]=0;
+		cfg->writeFile(_temp);
+		delete []_temp;
+		return true;
 	}
 	return true;
 }

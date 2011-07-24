@@ -51,10 +51,12 @@ void object3DS::buffer()
 	}
 }
 
-// конструктор по заданной позиции
-object3DS::object3DS(vertex pos)
+void object3DS::init()
 {
-	position=pos;
+	if (directionMatrix)
+	{
+		delete []directionMatrix;
+	}
 	// матрица поворота
 	directionMatrix=new GLfloat[16];
 	for (int j=0; j<4; j++)
@@ -66,10 +68,46 @@ object3DS::object3DS(vertex pos)
 		directionMatrix[j*4+j]=1; // set 1 by main diagonal
 	}
 	// задание координат в матрице
-	directionMatrix[12]=pos.coordinate[0];
-	directionMatrix[13]=pos.coordinate[1];
-	directionMatrix[14]=pos.coordinate[2];
+	directionMatrix[12]=position.coordinate[0];
+	directionMatrix[13]=position.coordinate[1];
+	directionMatrix[14]=position.coordinate[2];
+}
+
+// конструктор по умолчанию
+object3DS::object3DS():directionMatrix(NULL),tex(NULL)
+{
+	position=vertex(0,0,0);
+	init();
+}
+
+// конструктор по заданной позиции
+object3DS::object3DS(vertex &pos):directionMatrix(NULL),tex(NULL)
+{
+	position=pos;
+	init();
 };
+
+object3DS::~object3DS()
+{
+	if (directionMatrix)
+	{
+		delete [] directionMatrix;
+	}
+	if (tex)
+	{
+		delete tex;
+	}
+	for (int i=0; i<indexCount.size(); i++)
+	{
+		delete [] indexVertexNormal[i];
+		delete [] localMatrix[i];
+	}
+	name.clear();
+	indexCount.clear();
+	indexVertexNormal.clear();
+	localMatrix.clear();
+	vertexVBO.clear();
+}
 
 void object3DS::render(int filterMode)
 {
@@ -101,7 +139,7 @@ void object3DS::render(int filterMode)
 				// включение массива текстурных координат
 				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 				// привязка текстуры
-				tex.bind();
+				tex->bind();
 				// установка указателя на массив текстурных координат по VBO
 				//GLvoid * tmpK=(GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]);
 				glTexCoordPointer(2, GL_FLOAT, sizeof(vertexNormalTex), (GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]));
@@ -287,23 +325,23 @@ bool object3DS::load(wstring fname)
 			0,0,0,1
 		};
 
+		// количество полигонов
+		unsigned short iCount;
+		// список координат вершин и их нормалей по индексам
+		vertexNormalTex *iVertex;
+		// количество вершин
+		unsigned short vCount;
+		// количество текстурных координат вершин
+		unsigned short texCount;
+		// список вершин
+		GLfloat *vList;
+		// список текстурных координат
+		GLfloat *texCoord;
+		// матрица поворота объекта
+		GLfloat *lMatrix;
+
 		do
 		{
-			// количество полигонов
-			unsigned short iCount;
-			// список координат вершин и их нормалей по индексам
-			vertexNormalTex *iVertex;
-			// количество вершин
-			unsigned short vCount;
-			// количество текстурных координат вершин
-			unsigned short texCount;
-			// список вершин
-			GLfloat *vList;
-			// список текстурных координат
-			GLfloat *texCoord;
-			// матрица поворота объекта
-			GLfloat *lMatrix=new GLfloat[16];
-			memcpy(lMatrix,lMatrixTemplate,sizeof(GLfloat)*16);
 			// имя объекта
 			string objectName="";
 
@@ -410,6 +448,9 @@ bool object3DS::load(wstring fname)
 			chunkPos=findChunk(ifs,obj3ds::LOCALMATRIX);
 			if(chunkPos!=0) // found
 			{
+				lMatrix=new GLfloat[16];
+				memcpy(lMatrix,lMatrixTemplate,sizeof(GLfloat)*16);
+
 				float tmp[3];
 				ifs.ignore(6);
 				//for (int i=0; i<4; i++)

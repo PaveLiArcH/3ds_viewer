@@ -35,13 +35,19 @@ private:
 	// буфер VBO для вершин
 	vector<GLuint> vertexVBO;
 	// текстура
-	texture tex;
+	texture *tex;
 	static bool newOGL, hasVBO;
 	// поиск чанка по потоку
 	unsigned int findChunk(ifstream& ifs, unsigned short id, bool parent=true);
+	// инициализация
+	void init();
 public:
+	// конструктор по умолчанию
+	object3DS();
 	// конструктор по заданной позиции
-	object3DS(vertex pos=vertex(0,0,0));
+	object3DS(vertex &pos);
+	// деструктор
+	~object3DS();
 	// загрузка файла 3ds и запись в буферы VBO
 	bool load(wstring fname);
 	// вывод объекта на экран
@@ -51,7 +57,7 @@ public:
 	// установка масштаба
 	void setScale(GLfloat scale);
 	// установка положения объекта
-	void setPosition(vertex pos)
+	void setPosition(vertex &pos)
 	{
 		position=pos;
 		directionMatrix[12]=pos.coordinate[0];
@@ -60,7 +66,7 @@ public:
 	}
 	void copyTex(texture *t)
 	{
-		memcpy(&tex,t,sizeof(texture));
+		tex=t;
 	}
 	GLfloat * getColor()
 	{

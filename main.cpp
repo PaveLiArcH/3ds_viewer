@@ -1,4 +1,6 @@
 //#define _HAS_ITERATOR_DEBUGGING 0
+// catch mem leaks
+#include <vld.h>
 //Glee
 #include "glee.h"
 //VC++
@@ -499,6 +501,7 @@ bool loadObjects(vector<object3DS *> &objs)
 	int kb,kc,kf,ks,kt,posBegin,posEnd;
 	GLfloat scale=1.0f,temp;
 	texture *tex=NULL;
+	object3DS *object=new object3DS();
 	while (!configFile.eof())
 	{
 		tmp.clear();
@@ -508,7 +511,6 @@ bool loadObjects(vector<object3DS *> &objs)
 			tmp+=c;
 			configFile.get((wchar_t &)c);
 		}
-		object3DS *object=new object3DS();
 		try
 		{
 			kb=swscanf(tmp.c_str(),L"V = (%f, %f, %f)", &tempVertex.coordinate[0], &tempVertex.coordinate[1], &tempVertex.coordinate[2]);
@@ -529,9 +531,9 @@ bool loadObjects(vector<object3DS *> &objs)
 				file=tmp.substr(posBegin,posEnd-posBegin);
 				glActiveTexture(GL_TEXTURE0);
 				
-				if (tex!=NULL)
+				if (tex)
 				{
-					tex->~texture();
+					delete tex;
 					tex=NULL;
 				};
 				tex=new texture();
@@ -565,7 +567,24 @@ bool loadObjects(vector<object3DS *> &objs)
 		{
 		}
 	}
+	if (object)
+	{
+		delete object;
+	}
+	if (tex)
+	{
+		delete tex;
+	}
 	return true;
+}
+
+void onExit()
+{
+	for (int i=0; i<objects.size(); i++)
+	{
+		delete objects[i];
+	}
+	objects.clear();
 }
 
 void main (int argc,char **argv)
@@ -583,6 +602,10 @@ void main (int argc,char **argv)
 	glutInitWindowSize(600,600);
 	// 3. создаем окно
 	glutCreateWindow("Anytime, anywhere…");
+	// устанавливаем обработчик выхода (для освобождения выделенной памяти)
+	atexit(onExit);
+	// переходим в полноэкранный режим
+	glutFullScreen();
 
 	// очистка объектов
 	objects.clear();
@@ -662,7 +685,7 @@ void main (int argc,char **argv)
 	int i=0;
 	while (ext[i]!=0)
 		printf("%c",ext[i++]==' '?'\n':ext[i-1]);
-
+	
 	// основной цикл обработки сообщений ОС
 	glutMainLoop();
 	return;

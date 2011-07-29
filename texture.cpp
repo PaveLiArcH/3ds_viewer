@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "texture.h"
 
 GLuint texture::mode=0;

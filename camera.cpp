@@ -8,8 +8,8 @@
 //libconfig
 #include "libconfig/libconfig.h++"
 //self implemented
+#include "stdafx.h"
 #include "camera.h"
-#include "main.h"
 
 using namespace glm;
 using namespace std;

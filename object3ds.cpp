@@ -1,5 +1,6 @@
-#include "object3ds.h"
 #include <fstream>
+#include "stdafx.h"
+#include "object3ds.h"
 #include "3ds_info.h"
 
 using namespace std;

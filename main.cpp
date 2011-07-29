@@ -3,18 +3,6 @@
 //#include <vld.h>
 //Glee
 #include "glee.h"
-//VC++
-#include <stdlib.h>
-#include <iostream>
-#include <vector>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <conio.h>
-#include <stdio.h>
-#include <windows.h>
-#include <clocale>
-#include <wchar.h>
 //DevIL
 #include "IL/il.h"
 #include "IL/ilu.h"
@@ -26,15 +14,13 @@
 //libconfig
 #include "libconfig/libconfig.h++"
 //self implemented
-#include "main.h"
+#include "stdafx.h"
 #include "camera.h"
 #include "vkscancodes.h"
 #include "vertex.h"
 #include "object3ds.h"
 #include "shader.h"
 #include "texture.h"
-
-#define root2 0.70710678118654752440084436210485f
 
 using namespace glm;
 using namespace std;

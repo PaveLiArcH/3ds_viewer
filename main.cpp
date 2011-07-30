@@ -26,10 +26,6 @@ using namespace glm;
 using namespace std;
 using namespace libconfig;
 
-#define surfaceSpace 5
-#define halfWi 1
-
-//const string cfgPath="config.cfg";
 int frame=0,time,timebase=0,w,h,delayPerFrames=20,filterMode=0,g_nMaxAnisotropy;
 char s[20];
 bool isDrawingFps=false, isDrawingBack=false;
@@ -233,7 +229,7 @@ void drawFps()
 	if (time - timebase > 1000) {
 		sprintf(s,"FPS:%4.2f",
 			frame*1000.0/(time-timebase));
-		timebase = time;		
+		timebase = time;
 		frame = 0;
 		//printf("%s\n",s);
 	}

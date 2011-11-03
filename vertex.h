@@ -1,10 +1,10 @@
+#ifndef __vertex_h__
+#define __vertex_h__
+
 #include "stdafx.h"
 #include "glm\glm.hpp"
 
 using namespace glm;
-
-#ifndef __vertex_h__
-#define __vertex_h__
 
 //class point
 //{

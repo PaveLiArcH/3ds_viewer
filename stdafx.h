@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include <map>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -18,18 +19,12 @@
 
 using namespace std;
 
-#pragma region TypeDefinitions
-#define floatType GLfloat
-#define intType GLint
-#define uintType GLuint
-#pragma endregion Определение типов
+#include "3dsTypes.h"
 
 #pragma region ValuesDefinitions
 #define root2 0.70710678118654752440084436210485f
 #define surfaceSpace 5
 #define halfWi 1
 #pragma endregion Определение значений
-
-const static string cfgPath="config.cfg";
 
 #endif

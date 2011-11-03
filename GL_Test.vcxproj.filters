@@ -24,9 +24,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="object3ds.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -36,11 +33,17 @@
     <ClCompile Include="GLee.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="3dsLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="3ds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="3dsHeader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="3ds_info.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -48,9 +51,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GLUT.H">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="object3ds.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="shader.h">
@@ -80,6 +80,21 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="3dsHeader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="3dsLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="3dsTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="3ds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="3dsChunks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="3DS_spec.txt">
@@ -90,9 +105,6 @@
     </None>
     <None Include="3ds-info.txt">
       <Filter>Help Files</Filter>
-    </None>
-    <None Include="libconfig\libconfig.h++">
-      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -5,8 +5,6 @@
 #include <fstream>
 //glm
 #include "glm/glm.hpp"
-//libconfig
-#include "libconfig/libconfig.h++"
 //self implemented
 #include "stdafx.h"
 #include "camera.h"
@@ -14,14 +12,14 @@
 using namespace glm;
 using namespace std;
 
-camera::camera(vec3 newPosition, vec3 newViewPoint):cfg(NULL)
+camera::camera(vec3 newPosition, vec3 newViewPoint)
 {
 	viewPoint=newViewPoint;
 	position=newPosition;
 	applyCamera();
 }
 
-camera::camera():cfg(NULL)
+camera::camera()
 {
 	viewPoint=vec3(0,0,0);
 	position=vec3(0,30,20);
@@ -191,40 +189,6 @@ void camera::moveDown()
 	applyCamera();
 }
 
-bool camera::loadCamera(Config *conf)
-{
-	cfg=conf;
-	cfg->lookupValue("application.camera.position.x",position.x);
-	cfg->lookupValue("application.camera.position.y",position.y);
-	cfg->lookupValue("application.camera.position.z",position.z);
-	cfg->lookupValue("application.camera.point.x",viewPoint.x);
-	cfg->lookupValue("application.camera.point.y",viewPoint.y);
-	cfg->lookupValue("application.camera.point.z",viewPoint.z);
-	applyCamera();
-	return true;
-}
-
-bool camera::saveCamera()
-{
-	if (cfg)
-	{
-		cfg->lookup("application.camera.position.x")=position.x;
-		cfg->lookup("application.camera.position.y")=position.y;
-		cfg->lookup("application.camera.position.z")=position.z;
-		cfg->lookup("application.camera.point.x")=viewPoint.x;
-		cfg->lookup("application.camera.point.y")=viewPoint.y;
-		cfg->lookup("application.camera.point.z")=viewPoint.z;
-		char *_temp=new char[cfgPath.size()+1];
-		memcpy(_temp,cfgPath.c_str(),cfgPath.size());
-		_temp[cfgPath.size()]=0;
-		cfg->writeFile(_temp);
-		delete []_temp;
-		return true;
-	}
-	return true;
-}
-
 camera::~camera()
 {
-	saveCamera();
 }

@@ -1,3 +1,6 @@
+#ifndef __camera_h__
+#define __camera_h__
+
 //#define _HAS_ITERATOR_DEBUGGING 0
 
 //Glee
@@ -6,20 +9,13 @@
 #include "glut.h"
 //glm
 #include "glm/glm.hpp"
-//libconfig
-#include "libconfig/libconfig.h++"
 
 using namespace glm;
-using namespace libconfig;
-
-#ifndef __camera_h__
-#define __camera_h__
 
 class camera
 {
 	GLdouble orientationMatrix[16], positionMatrix[16];
 	vec3 right,up,forward,viewPoint,position;
-	Config *cfg;
 	// Выполняет обновление матрицы позиции камеры. Параметров нет.
 	void updatePositionMatrix();
 	// Выполняет обновление матрицы ориентации камеры. Параметров нет.
@@ -51,10 +47,6 @@ public:
 	void moveUp();
 	// Перемещение вниз по сфере на единичный вектор.
 	void moveDown();
-	// Загрузка состояния камеры.
-	bool loadCamera(Config *cfg);
-	// Сохранение состояния камеры.
-	bool saveCamera();
 };
 
 #endif

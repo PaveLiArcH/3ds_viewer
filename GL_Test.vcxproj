@@ -74,15 +74,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="3dsHeader.cpp" />
+    <ClCompile Include="3dsLoader.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="GLee.c" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="object3ds.cpp" />
+    <ClCompile Include="3ds.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="3ds_info.h" />
+    <ClInclude Include="3dsHeader.h" />
+    <ClInclude Include="3dsLoader.h" />
+    <ClInclude Include="3dsTypes.h" />
+    <ClInclude Include="3dsChunks.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="GLee.h" />
     <ClInclude Include="glm\glm.hpp" />
@@ -90,7 +95,7 @@
     <ClInclude Include="il\il.h" />
     <ClInclude Include="il\ilu.h" />
     <ClInclude Include="il\ilut.h" />
-    <ClInclude Include="object3ds.h" />
+    <ClInclude Include="3ds.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="texture.h" />
@@ -101,7 +106,6 @@
     <None Include="3ds-chunks.txt" />
     <None Include="3ds-info.txt" />
     <None Include="3DS_spec.txt" />
-    <None Include="libconfig\libconfig.h++" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

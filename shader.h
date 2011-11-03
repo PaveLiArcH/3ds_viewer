@@ -1,3 +1,6 @@
+#ifndef __shader_h__
+#define __shader_h__
+
 #include "glee.h"
 #include "glut.h"
 #include <string>
@@ -5,9 +8,6 @@
 #include "vertex.h"
 
 using namespace std;
-
-#ifndef __shader_h__
-#define __shader_h__
 
 class shader
 {

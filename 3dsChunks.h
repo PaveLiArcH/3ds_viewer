@@ -1,209 +1,212 @@
-#ifndef __3ds_info_h__
-#define __3ds_info_h__
+#ifndef __3dsChunks_h__
+#define __3dsChunks_h__
 
-namespace obj3ds
+namespace n3ds
 {
-	// chunk numbers
-	enum chunks {
-		/*color chunks*/
-		RGBf=0x0010, // RGB float
-		RGBb=0x0011, // RGB byte
-		RGBbGAMMACORRECTED=0x0012, // RGB (byte) gamma corrected
-		RGBfGAMMACORRECTED=0x0013, // RGB (float) gamma corrected
+	namespace chunks
+	{
+		// chunk numbers
+		enum chunks {
+			/*color chunks*/
+			RGBf=0x0010, // RGB float
+			RGBb=0x0011, // RGB byte
+			RGBbGAMMACORRECTED=0x0012, // RGB (byte) gamma corrected
+			RGBfGAMMACORRECTED=0x0013, // RGB (float) gamma corrected
 
-		/*percent chunks*/
-		PERCENTi=0x0030, // percent (int)
-		PERCENTf=0x0031, // percent (float)
+			/*percent chunks*/
+			PERCENTi=0x0030, // percent (int)
+			PERCENTf=0x0031, // percent (float)
 
-		PROJECT=0xC23D, // project
-		MATERIALLIB=0x3DAA, // material library
+			PROJECT=0xC23D, // project
+			MATERIALLIB=0x3DAA, // material library
 
-		/*main chunk*/
-		MAIN=0x4D4D, // main
-			VERSION=0x0002, // 3DS-version
-			/*3D editor chunk*/
-			EDITOR=0x3D3D, // 3D editor chunk (object Mesh)
-				ONEUNIT=0x0100, // one unit
+			/*main chunk*/
+			MAIN=0x4D4D, // main
+				VERSION=0x0002, // 3DS-version
+				/*3D editor chunk*/
+				EDITOR=0x3D3D, // 3D editor chunk (object Mesh)
+					ONEUNIT=0x0100, // one unit
 
-				/*background chunks*/
-				BKGBMP=0x1100, // background bitmap
-				BKGBMPUSE=0x1101, // use background bitmap
-				BKGCOLOR=0x1200, // background color
-				BKGCOLORUSE=0x1201, // use background color
+					/*background chunks*/
+					BKGBMP=0x1100, // background bitmap
+					BKGBMPUSE=0x1101, // use background bitmap
+					BKGCOLOR=0x1200, // background color
+					BKGCOLORUSE=0x1201, // use background color
 
-				/*gradient chunks*/
-				GRADIENTCOLORS=0x1300, // gradient colors
-				GRADIENTCOLORSUSE=0x1301, // use gradient
+					/*gradient chunks*/
+					GRADIENTCOLORS=0x1300, // gradient colors
+					GRADIENTCOLORSUSE=0x1301, // use gradient
 
-				/*shadow map chunks*/
-				SHADOWMAPBIAS=0x1400, // shadow map bias
-				SHADOWMAPSIZE=0x1420, // shadow map size
-				SHADOWMAPSAMPLERANGE=0x1450, // shadow map sample range
+					/*shadow map chunks*/
+					SHADOWMAPBIAS=0x1400, // shadow map bias
+					SHADOWMAPSIZE=0x1420, // shadow map size
+					SHADOWMAPSAMPLERANGE=0x1450, // shadow map sample range
 
-				/*raytrace chunks*/
-				RAYTRACEBIAS=0x1460, // raytrace bias
-				RAYTRACEON=0x1470, // raytrace on
-				AMBIENTCOLOR=0x2100, // ambient color
+					/*raytrace chunks*/
+					RAYTRACEBIAS=0x1460, // raytrace bias
+					RAYTRACEON=0x1470, // raytrace on
+					AMBIENTCOLOR=0x2100, // ambient color
 
-				FOG=0x2200, // fog
-					FOGBKG=0x2210, // fog background
-				FOGUSE=0x2201, // use fog
-				FOGBKGCOPY=0x2210, // fog background
+					FOG=0x2200, // fog
+						FOGBKG=0x2210, // fog background
+					FOGUSE=0x2201, // use fog
+					FOGBKGCOPY=0x2210, // fog background
 
-				DISTANCEQUEUE=0x2300, // distance queue
-					DIMBKG=0x2310, // dim background
-				DISTANCEUSE=0x2301, // use distance queue
-				FOGLAYEREDOPTIONS=0x2302, // layered fog options
-				FOGLAYEREDUSE=0x2303, // use layered fog
+					DISTANCEQUEUE=0x2300, // distance queue
+						DIMBKG=0x2310, // dim background
+					DISTANCEUSE=0x2301, // use distance queue
+					FOGLAYEREDOPTIONS=0x2302, // layered fog options
+					FOGLAYEREDUSE=0x2303, // use layered fog
 
-				MESHVERSION=0x3D3E, // mesh version
+					MESHVERSION=0x3D3E, // mesh version
 
-				/*object chunks*/
-				OBJECT=0x4000, // object block
-					HIDDEN=0x4010, // object hidden
-					NOTCAST=0x4012, // object doesn't cast
-					MATTE=0x4013, // matte object
-					EXTERNALPROCESS=0x4015, // external process on
-					SHADOWLESS=0x4017, // object doesn't receive shadows
+					/*object chunks*/
+					OBJECT=0x4000, // object block
+						HIDDEN=0x4010, // object hidden
+						NOTCAST=0x4012, // object doesn't cast
+						MATTE=0x4013, // matte object
+						EXTERNALPROCESS=0x4015, // external process on
+						SHADOWLESS=0x4017, // object doesn't receive shadows
 
-					/*triangular mesh*/
-					TRIMESH=0x4100, // triangular mesh
-						VERTEXLIST=0x4110, // vertices list
-						VERTEXOPTIONS=0x4111, // vertex flag list
-						FACESLIST=0x4120, // faces description
-							MATERIALLIST=0x4130, // faces material list
-							SMOOTHLIST=0x4150, // smoothing group list
-						MAPPINGCOORDS=0x4140, // mappings list
-						LOCALMATRIX=0x4160, // local coordinate system
-						MAPPINGSTANDARD=0x4170, // texture info
-						COLOR=0x4165, // object color in editor
-						VISIBLE=0x4165, // visibility
+						/*triangular mesh*/
+						TRIMESH=0x4100, // triangular mesh
+							VERTEXLIST=0x4110, // vertices list
+							VERTEXOPTIONS=0x4111, // vertex flag list
+							FACESLIST=0x4120, // faces description
+								MATERIALLIST=0x4130, // faces material list
+								SMOOTHLIST=0x4150, // smoothing group list
+							MAPPINGCOORDS=0x4140, // mappings list
+							LOCALMATRIX=0x4160, // local coordinate system
+							MAPPINGSTANDARD=0x4170, // texture info
+							COLOR=0x4165, // object color in editor
+							VISIBLE=0x4165, // visibility
 
-						EXTERNALPROCESSNAME=0x4181, // external process name
-						EXTERNALPROCESSPARAMS=0x4182, // external process parameters
+							EXTERNALPROCESSNAME=0x4181, // external process name
+							EXTERNALPROCESSPARAMS=0x4182, // external process parameters
 
-					/*light*/
-					LIGHT=0x4600, // light
-						SPOTLIGHT=0x4610, // spotlight
-							SPOTRAYTRACE=0x4627, // spot raytrace
-							LIGHTSHADOWED=0x4630, // light shadowed
-							SPOTSHADOWMAP=0x4641, // spot shadow map
-							SPOTSHOWCONE=0x4650, // spot show cone
-							SPOTRECTANGULAR=0x4651, // spot is rectangular
-							SPOTOVERSHOOT=0x4652, // spot overshoot
-							SPOTMAP=0x4653, // spot map
-							SPOTROLL=0x4656, // spot roll
-							SPOTRAYTRACEBIAS=0x4658, // spot ray trace bias
-						LIGHTOFF=0x4620, // light off
-						ATTENUATION=0x4625, // attenuation on
-						RANGESTART=0x4659, // range start
-						RANGEEND=0x465A, // range end
-						MULTIPLIER=0x465B, // multiplier
+						/*light*/
+						LIGHT=0x4600, // light
+							SPOTLIGHT=0x4610, // spotlight
+								SPOTRAYTRACE=0x4627, // spot raytrace
+								LIGHTSHADOWED=0x4630, // light shadowed
+								SPOTSHADOWMAP=0x4641, // spot shadow map
+								SPOTSHOWCONE=0x4650, // spot show cone
+								SPOTRECTANGULAR=0x4651, // spot is rectangular
+								SPOTOVERSHOOT=0x4652, // spot overshoot
+								SPOTMAP=0x4653, // spot map
+								SPOTROLL=0x4656, // spot roll
+								SPOTRAYTRACEBIAS=0x4658, // spot ray trace bias
+							LIGHTOFF=0x4620, // light off
+							ATTENUATION=0x4625, // attenuation on
+							RANGESTART=0x4659, // range start
+							RANGEEND=0x465A, // range end
+							MULTIPLIER=0x465B, // multiplier
 
-					CAMERA3DS=0x4700, // camera
+						CAMERA3DS=0x4700, // camera
 
-					HIERARCHY3DS=0x4F00, // hierarchy
+						HIERARCHY3DS=0x4F00, // hierarchy
 
-				/*window settings*/
-				VIEWPORT=0x7001, // window settings
-				WINDOWSETTINGS=0x7001, // window settings
-					WINDOWDESCR1=0x7011, // window description #1 ...
-					WINDOWDESCR2=0x7012, // window description #2 ...
-					MESHWINDOWS=0x7020, // mesh windows ...
+					/*window settings*/
+					VIEWPORT=0x7001, // window settings
+					WINDOWSETTINGS=0x7001, // window settings
+						WINDOWDESCR1=0x7011, // window description #1 ...
+						WINDOWDESCR2=0x7012, // window description #2 ...
+						MESHWINDOWS=0x7020, // mesh windows ...
 
-				/*material block*/
-				MATERIAL=0xAFFF, // material block
-					MATERIALNAME=0xA000, // material name
+					/*material block*/
+					MATERIAL=0xAFFF, // material block
+						MATERIALNAME=0xA000, // material name
 
-					MATERIALAMBIENTCOLOR=0xA010, // ambient color
-					DIFFUSECOLOR=0xA020, // diffuse color
-					SPECULARCOLOR=0xA030, // specular color
+						MATERIALAMBIENTCOLOR=0xA010, // ambient color
+						DIFFUSECOLOR=0xA020, // diffuse color
+						SPECULARCOLOR=0xA030, // specular color
 
-					SHININESSPERCENT=0xA040, // shininess percent
-					SHININESSSTRENGTHPERCENT=0xA041, // shininess strength percent
+						SHININESSPERCENT=0xA040, // shininess percent
+						SHININESSSTRENGTHPERCENT=0xA041, // shininess strength percent
 
-					TRANSPARENCYPERCENT=0xA050, // transparency percent
-					TRANSPARENCYFALLOFFPERCENT=0xA052, // transparency falloff percent
-					REFLECTIONBLURPERCENT=0xA053, // reflection blur percent
+						TRANSPARENCYPERCENT=0xA050, // transparency percent
+						TRANSPARENCYFALLOFFPERCENT=0xA052, // transparency falloff percent
+						REFLECTIONBLURPERCENT=0xA053, // reflection blur percent
 
-					TWOSIDED=0xA081, // 2 sided
-					ADDTRANS=0xA083, // Add trans
-					SELFILLUM=0xA084, // self illum.
-					WIREFRAMEON=0xA085, // wire frame on
-					WIRETHICKNESS=0xA087, // wire thickness
-					FACEMAP=0xA088, // face map
-					INTRANC=0xA08A, // in tranc
-					SOFTEN=0xA08C, // soften
-					WIREINUNITS=0xA08E, // wire in units
+						TWOSIDED=0xA081, // 2 sided
+						ADDTRANS=0xA083, // Add trans
+						SELFILLUM=0xA084, // self illum.
+						WIREFRAMEON=0xA085, // wire frame on
+						WIRETHICKNESS=0xA087, // wire thickness
+						FACEMAP=0xA088, // face map
+						INTRANC=0xA08A, // in tranc
+						SOFTEN=0xA08C, // soften
+						WIREINUNITS=0xA08E, // wire in units
 
-					RENDERTYPE=0xA100, // render type
+						RENDERTYPE=0xA100, // render type
 
-					TRANSPARENCYFALLOFFPERCENTPERCENT=0xA240, // transparency falloff percent present
-					REFLECTIONBLURPERCENTPERCENT=0xA250, // reflection blur percent present
-					BUMPMAPPERCENT=0xA252, // bump map present (true percent)
+						TRANSPARENCYFALLOFFPERCENTPERCENT=0xA240, // transparency falloff percent present
+						REFLECTIONBLURPERCENTPERCENT=0xA250, // reflection blur percent present
+						BUMPMAPPERCENT=0xA252, // bump map present (true percent)
 
-					/*maps*/
-					TEXTUREMAP1=0xA200, // texture map 1
-					TEXTUREMAP2=0xA33A, // texture map 2
-					OPACITYMAP=0xA210, // opacity map
-					BUMPMAP=0xA230, // bump map
-					SHININESSMAP=0xA33C, // shininess map
-					SPECULARMAP=0xA204, // specular map
-					SELFILLUMMAP=0xA33D, // self illum. map
-					REFLECTIONMAP=0xA220, // reflection map
+						/*maps*/
+						TEXTUREMAP1=0xA200, // texture map 1
+						TEXTUREMAP2=0xA33A, // texture map 2
+						OPACITYMAP=0xA210, // opacity map
+						BUMPMAP=0xA230, // bump map
+						SHININESSMAP=0xA33C, // shininess map
+						SPECULARMAP=0xA204, // specular map
+						SELFILLUMMAP=0xA33D, // self illum. map
+						REFLECTIONMAP=0xA220, // reflection map
 
-					/*masks*/
-					MASK4TEXTUREMAP1=0xA33E, // mask for texture map 1
-					MASK4TEXTUREMAP2=0xA340, // mask for texture map 2
-					MASK4OPACITYMAP=0xA342, // mask for opacity map
-					MASK4BUMPMAP=0xA344, // mask for bump map
-					MASK4SHININESSMAP=0xA346, // mask for shininess map
-					MASK4SPECULARMAP=0xA348, // mask for specular map
-					MASK4SELFILLUMMAP=0xA34A, // mask for self illum. map
-					MASK4REFLECTIONMAP=0xA34C, // mask for reflection map
+						/*masks*/
+						MASK4TEXTUREMAP1=0xA33E, // mask for texture map 1
+						MASK4TEXTUREMAP2=0xA340, // mask for texture map 2
+						MASK4OPACITYMAP=0xA342, // mask for opacity map
+						MASK4BUMPMAP=0xA344, // mask for bump map
+						MASK4SHININESSMAP=0xA346, // mask for shininess map
+						MASK4SPECULARMAP=0xA348, // mask for specular map
+						MASK4SELFILLUMMAP=0xA34A, // mask for self illum. map
+						MASK4REFLECTIONMAP=0xA34C, // mask for reflection map
 
-						/*sub-chunks for all maps:*/
-						MAPFILENAME=0xA300, // mapping filename
-						MAPPARAMS=0xA351, // mapping parameters
-						BLURPERCENT=0xA353, // blur percent
-						VSCALE=0xA354, // V scale
-						USCALE=0xA356, // U scale
-						UOFFSET=0xA358, // U offset
-						VOFFSET=0xA35A, // V offset
-						ROTATIONANGLE=0xA35C, // rotation angle
-						RGBTINT1=0xA360, // RGB Luma/Alpha tint 1
-						RGBTINT2=0xA362, // RGB Luma/Alpha tint 2
-						RTINT=0xA364, // RGB tint R
-						GTINT=0xA366, // RGB tint G
-						BTINT=0xA368, // RGB tint B
+							/*sub-chunks for all maps:*/
+							MAPFILENAME=0xA300, // mapping filename
+							MAPPARAMS=0xA351, // mapping parameters
+							BLURPERCENT=0xA353, // blur percent
+							VSCALE=0xA354, // V scale
+							USCALE=0xA356, // U scale
+							UOFFSET=0xA358, // U offset
+							VOFFSET=0xA35A, // V offset
+							ROTATIONANGLE=0xA35C, // rotation angle
+							RGBTINT1=0xA360, // RGB Luma/Alpha tint 1
+							RGBTINT2=0xA362, // RGB Luma/Alpha tint 2
+							RTINT=0xA364, // RGB tint R
+							GTINT=0xA366, // RGB tint G
+							BTINT=0xA368, // RGB tint B
 
-				/*keyframer*/
-				KEYFRAMER=0xB000, // keyframer data
-					AMBIENTLIGHTINFO=0xB001, // ambient light information block
-					MESHINFO=0xB002, // mesh information block
-					CAMERAINFO=0xB003, // camera information block
-					CAMERATARGETINFO=0xB004, // camera target information block
-					OMNILIGHTINFO=0xB005, // omni light information block
-					SPOTLIGHTTARGETINFO=0xB006, // spot light target information block
-					SPOTLIGHTINFO=0xB007, // spot light information block
-					FRAMES=0xB008, // frames (start and end)
+					/*keyframer*/
+					KEYFRAMER=0xB000, // keyframer data
+						AMBIENTLIGHTINFO=0xB001, // ambient light information block
+						MESHINFO=0xB002, // mesh information block
+						CAMERAINFO=0xB003, // camera information block
+						CAMERATARGETINFO=0xB004, // camera target information block
+						OMNILIGHTINFO=0xB005, // omni light information block
+						SPOTLIGHTTARGETINFO=0xB006, // spot light target information block
+						SPOTLIGHTINFO=0xB007, // spot light information block
+						FRAMES=0xB008, // frames (start and end)
 					
-						/*possible sub-chunks for info blocks*/
-						OBJECTNAMEPARAMSHIERARCHY=0xB010, // object name, parameters and hierarchy father
-						PIVOTPOINT=0xB013, // object pivot point
-						MORPHANGLE=0xB015, // object morph angle
-						POSITIONTRACK=0xB020, // position track
-						ROTATIONTRACK=0xB021, // rotation track
-						SCALETRACK=0xB022, // scale track
-						FOVTRACK=0xB023, // FOV track
-						ROLLTRACK=0xB024, // roll track
-						COLORTRACK=0xB025, // color track
-						MORPHTRACK=0xB026, // morph track
-						HOTSPOTTRACK=0xB027, // hotspot track
-						FALLOFFTRACK=0xB028, // falloff track
-						HIDETRACK=0xB029, // hide track
-						HIERARCHYPOSITION=0xB030, // hierarchy position (object number)
-	};
+							/*possible sub-chunks for info blocks*/
+							OBJECTNAMEPARAMSHIERARCHY=0xB010, // object name, parameters and hierarchy father
+							PIVOTPOINT=0xB013, // object pivot point
+							MORPHANGLE=0xB015, // object morph angle
+							POSITIONTRACK=0xB020, // position track
+							ROTATIONTRACK=0xB021, // rotation track
+							SCALETRACK=0xB022, // scale track
+							FOVTRACK=0xB023, // FOV track
+							ROLLTRACK=0xB024, // roll track
+							COLORTRACK=0xB025, // color track
+							MORPHTRACK=0xB026, // morph track
+							HOTSPOTTRACK=0xB027, // hotspot track
+							FALLOFFTRACK=0xB028, // falloff track
+							HIDETRACK=0xB029, // hide track
+							HIERARCHYPOSITION=0xB030, // hierarchy position (object number)
+		};
+	}
 }
 
 #endif

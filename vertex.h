@@ -162,56 +162,6 @@ struct vertexNormalTex
 	}
 };
 
-class material
-{
-	// составляющие материала
-	GLfloat ambient[4],diffuse[4],specular[4],emission[4],shininess;
-public:
-	// конструктор по умолчанию
-	material()
-	{
-		//заполнение значениями по умолчанию
-		for(int i=0; i<4; i++)
-		{
-			ambient[i]=((i==3)?1.0f:0.2f);
-			diffuse[i]=((i==3)?1.0f:0.8f);
-			specular[i]=((i==3)?1.0f:0.0f);
-			emission[i]=((i==3)?1.0f:0.0f);
-		}
-		shininess=0;
-	}
-	// конструктор по передаваемым значениям
-	material(GLfloat *amb, GLfloat *diff=NULL, GLfloat *spec=NULL, GLfloat *emiss=NULL, GLfloat shin=0.0f)
-	{
-		// заполнение переданными значениями или значениями по умолчанию при переданном NULL
-		for(int i=0; i<4; i++)
-		{
-			ambient[i]=(amb)?amb[i]:((i==3)?1.0f:0.0f);
-			diffuse[i]=(diff)?diff[i]:((i==3)?1.0f:0.0f);
-			specular[i]=(spec)?spec[i]:((i==3)?1.0f:0.0f);
-			emission[i]=(emiss)?emiss[i]:((i==3)?1.0f:0.0f);
-		}
-		// контроль диапазона 0.0<=shininess<=128.0
-		shininess=((shin>=0.0f)&&(shin<=128.0f))?shin:0.0f;
-	}
-	// использование материала для граней face
-	bool use(GLenum face=GL_FRONT_AND_BACK)
-	{
-		// контроль переданных данных
-		if (face==GL_FRONT||face==GL_FRONT_AND_BACK||face==GL_FRONT)
-		{
-			// установка параметров материала
-			glMaterialfv(face,GL_AMBIENT,ambient);
-			glMaterialfv(face,GL_DIFFUSE,diffuse);
-			glMaterialfv(face,GL_SPECULAR,specular);
-			glMaterialfv(face,GL_EMISSION,emission);
-			glMaterialfv(face,GL_SHININESS,&shininess);
-			return true;
-		}
-		return false;
-	}
-};
-
 class lightSource
 {
 	// составляющие источника света

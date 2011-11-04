@@ -20,8 +20,12 @@
 #include "shader.h"
 #include "texture.h"
 
+#include "3dsMaterial.h"
+
 using namespace glm;
 using namespace std;
+
+std::ofstream _cerr;
 
 int frame=0,time,timebase=0,w,h,delayPerFrames=20,filterMode=0,g_nMaxAnisotropy;
 char s[20];
@@ -174,7 +178,7 @@ bool newOGL=false,hasVBO=false,hasFragmentShader=false,hasVertexShader=false;
 camera *cam;
 
 shader modelShader,planeShader;
-material planeMaterial=material(ambMat,difMat,speMat,0,64.0f);
+n3ds::c3dsMaterial planeMaterial=n3ds::c3dsMaterial(ambMat,difMat,speMat,0,64.0f);
 lightSource firstLight=lightSource(ambLig1,difLig1,speLig1,posLig1,dirLig1);
 lightSource secondLight=lightSource(ambLig2,difLig2,speLig2,posLig2,dirLig2);
 
@@ -279,7 +283,7 @@ void display (void)
 	firstLight.use();
 	secondLight.use(GL_LIGHT1);
 
-	planeMaterial.use();
+	planeMaterial.cm_Use();
 	planeShader.activate();
 
 	glEnable(GL_TEXTURE_2D);
@@ -465,7 +469,12 @@ void processSpecialKeys(int key, int x, int y)
 
 void onExit()
 {
+	if (_cerr.is_open())
+	{
+		_cerr.close();
+	}
 	delete cam;
+	delete object;
 }
 
 void wmain (int argc, wchar_t **argv)
@@ -474,6 +483,13 @@ void wmain (int argc, wchar_t **argv)
 	_wsetlocale(LC_ALL, L"");
 	// переменная для чтения пути к модели
 	wstring _3dsFile;
+	// создание файла лога работы
+	_cerr.open(L"~info.log",std::ios_base::beg|std::ios_base::out);
+	if (_cerr.is_open())
+	{
+		std::cerr.rdbuf(_cerr.rdbuf());
+	}
+
 	// проверка наличия входных аргументов
 	if (argc<2)
 	{

@@ -23,14 +23,23 @@ using namespace glm;
 
 namespace n3ds
 {
+	class c3dsMaterial;
+
 	class c3ds
 	{
 		friend class n3ds::c3dsLoader;
 	//	friend n3ds::tistream & operator >> (n3ds::tistream & a_istream, c3ds & a_object);
 	private:
+		// версия 3ds
 		t3dsVersion cf_version;
+		// версия меша
+		t3dsVersion cf_meshVersion;
 		// имя объекта
-		vector<string> name;
+		vector<string> cf_name;
+		// материал
+		vector<c3dsMaterial *> cf_material;
+		// величина единицы
+		tFloat cf_unit;
 		// количество полигонов
 		vector<unsigned short> indexCount;
 		// список координат вершин и их нормалей по индексам
@@ -84,5 +93,7 @@ namespace n3ds
 		static void checkExtensions();
 	};
 }
+
+#include "3dsMaterial.h"
 
 #endif

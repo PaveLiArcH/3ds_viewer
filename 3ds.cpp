@@ -76,6 +76,7 @@ namespace n3ds
 		directionMatrix[12]=position.coordinate[0];
 		directionMatrix[13]=position.coordinate[1];
 		directionMatrix[14]=position.coordinate[2];
+		cf_unit=1.0f;
 	}
 
 	// конструктор по умолчанию
@@ -102,16 +103,21 @@ namespace n3ds
 		{
 			delete tex;
 		}
-		for (int i=0; i<indexCount.size(); i++)
+		for (unsigned int i=0; i<indexCount.size(); i++)
 		{
 			delete [] indexVertexNormal[i];
 			delete [] localMatrix[i];
 		}
-		name.clear();
+		for (unsigned int i=0; i<cf_material.size(); i++)
+		{
+			delete cf_material[i];
+		}
+		cf_name.clear();
 		indexCount.clear();
 		indexVertexNormal.clear();
 		localMatrix.clear();
 		vertexVBO.clear();
+		cf_material.clear();
 	}
 
 	void c3ds::render(int filterMode)

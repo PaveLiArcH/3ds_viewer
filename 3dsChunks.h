@@ -10,8 +10,8 @@ namespace n3ds
 			/*color chunks*/
 			RGBf=0x0010, // RGB float
 			RGBb=0x0011, // RGB byte
-			RGBbGAMMACORRECTED=0x0012, // RGB (byte) gamma corrected
-			RGBfGAMMACORRECTED=0x0013, // RGB (float) gamma corrected
+			RGBGAMMACORRECTEDb=0x0012, // RGB (byte) gamma corrected
+			RGBGAMMACORRECTEDf=0x0013, // RGB (float) gamma corrected
 
 			/*percent chunks*/
 			PERCENTi=0x0030, // percent (int)

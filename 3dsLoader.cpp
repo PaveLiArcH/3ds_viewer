@@ -32,6 +32,8 @@ namespace n3ds
 			return &cm_chunkReaderMaterialBlock;
 		case(chunks::ONEUNIT):
 			return &cm_chunkReaderOneUnit;
+		case(chunks::OBJECT):
+			return &cm_chunkReaderObjectBlock;
 		default:
 			return &cm_chunkReaderUnknown;
 		}
@@ -114,6 +116,137 @@ namespace n3ds
 		a_object.cf_unit=_unit;
 		return true;
 	}
+
+	bool c3dsLoader::cm_chunkReaderObjectBlock (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден чанк блока объекта "<<std::hex<<a_header.id<<std::endl;
+		a_object.cf_object.push_back(new c3dsObject);
+		std::streamoff _maxoff=a_istream.tellg();
+		_maxoff=_maxoff+(a_header.len-6);
+		char _c;
+		string _temp;
+		while (a_istream.read(&_c,1)&&(!a_istream.eof())&&_c)
+		{
+			_temp+=_c;
+		}
+		a_object.cf_object.back()->SetName(_temp);
+		bool _res=cm_chunkReaderObject(a_istream, _maxoff, a_object);
+		return true;
+	}
+
+	#pragma region ObjectChunks
+	bool c3dsLoader::cm_chunkReaderObject (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object)
+	{
+		s3dsHeader _header;
+		bool _res;
+		while ((a_istream.tellg()<a_maxoffset)&&!(a_istream.fail()||a_istream.eof()||((a_istream>>_header).eof())))
+		{
+			ptChunkReaderObject _chunkReaderObject=cm_getChunkReaderObject(_header);
+			_res=(*_chunkReaderObject)(a_istream, _header, a_object);
+		}
+		return true;
+	}
+
+	ptChunkReaderObject c3dsLoader::cm_getChunkReaderObject(s3dsHeader & a_header)
+	{
+		switch (a_header.id)
+		{
+		case(chunks::HIDDEN):
+			return &cm_chunkReaderObjectHidden;
+		case(chunks::NOTSHADOWING):
+			return &cm_chunkReaderObjectNotShadowing;
+		case(chunks::NOTCAST):
+			return &cm_chunkReaderObjectNotCast;
+		case(chunks::MATTE):
+			return &cm_chunkReaderObjectMatte;
+		case(chunks::EXTERNALPROCESS):
+			return &cm_chunkReaderObjectExternalProcessed;
+		default:
+			return &cm_chunkReaderObjectUnknown;
+		}
+	}
+
+	bool c3dsLoader::cm_chunkReaderObjectHidden (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден чанк скрытости объекта "<<std::hex<<a_header.id<<std::endl;
+		a_object.cf_object.back()->SetHidden(true);
+		return true;
+	}
+
+	bool c3dsLoader::cm_chunkReaderObjectNotShadowing (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден чанк незатеняемости объекта "<<std::hex<<a_header.id<<std::endl;
+		a_object.cf_object.back()->SetNotShadowing(true);
+		return true;
+	}
+
+	bool c3dsLoader::cm_chunkReaderObjectNotCast (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден чанк нетенеобразующего объекта "<<std::hex<<a_header.id<<std::endl;
+		a_object.cf_object.back()->SetNotCast(true);
+		return true;
+	}
+
+	bool c3dsLoader::cm_chunkReaderObjectMatte (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден чанк матового объекта "<<std::hex<<a_header.id<<std::endl;
+		a_object.cf_object.back()->SetMatte(true);
+		return true;
+	}
+
+	bool c3dsLoader::cm_chunkReaderObjectExternalProcessed (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден чанк внешнеобрабатываемого объекта "<<std::hex<<a_header.id<<std::endl;
+		a_object.cf_object.back()->SetExternalProcessed(true);
+		return true;
+	}
+
+	bool c3dsLoader::cm_chunkReaderObjectUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден неизвестный чанк "<<std::hex<<a_header.id<<" в блоке объектных чанков"<<std::endl;
+		if (a_header.len<6)
+		{
+			std::cerr<<"\tНекорректная длина чанка"<<std::endl;
+			// TODO throw an exception
+			return false;
+		}
+		a_istream.seekg(a_header.len-6, std::ios::cur);
+		return true;
+	}
+	#pragma endregion Объектные чанки
+	
+	#pragma region ObjectTrimeshChunks
+	bool c3dsLoader::cm_chunkReaderObject (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object)
+	{
+		s3dsHeader _header;
+		bool _res;
+		while ((a_istream.tellg()<a_maxoffset)&&!(a_istream.fail()||a_istream.eof()||((a_istream>>_header).eof())))
+		{
+			ptChunkReaderObject _chunkReaderObject=cm_getChunkReaderObject(_header);
+			_res=(*_chunkReaderObject)(a_istream, _header, a_object);
+		}
+		return true;
+	}
+
+	ptChunkReaderObject c3dsLoader::cm_getChunkReaderObject(s3dsHeader & a_header)
+	{
+		switch (a_header.id)
+		{
+		case(chunks::HIDDEN):
+			return &cm_chunkReaderObjectHidden;
+		case(chunks::NOTSHADOWING):
+			return &cm_chunkReaderObjectNotShadowing;
+		case(chunks::NOTCAST):
+			return &cm_chunkReaderObjectNotCast;
+		case(chunks::MATTE):
+			return &cm_chunkReaderObjectMatte;
+		case(chunks::EXTERNALPROCESS):
+			return &cm_chunkReaderObjectExternalProcessed;
+		default:
+			return &cm_chunkReaderObjectUnknown;
+		}
+	}
+	#pragma endregion Объектные тримеш-чанки
 
 	#pragma region MaterialChunks
 	bool c3dsLoader::cm_chunkReaderMaterial (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object)

@@ -24,6 +24,7 @@ using namespace glm;
 namespace n3ds
 {
 	class c3dsMaterial;
+	class c3dsObject;
 
 	class c3ds
 	{
@@ -35,28 +36,28 @@ namespace n3ds
 		// версия меша
 		t3dsVersion cf_meshVersion;
 		// имя объекта
-		vector<string> cf_name;
-		// материал
+		//vector<string> cf_name;
+		// материалы
 		vector<c3dsMaterial *> cf_material;
 		// величина единицы
 		tFloat cf_unit;
-		// количество полигонов
-		vector<unsigned short> indexCount;
-		// список координат вершин и их нормалей по индексам
-		vector<vertexNormalTex *> indexVertexNormal;
-		// позиция объекта
-		vertex position;
-		// матрицы поворота объектов
-		vector<GLfloat *> localMatrix;
-		// матрица поворота объекта
-		GLfloat *directionMatrix;
-		// буфер VBO для вершин
-		vector<GLuint> vertexVBO;
+		//// количество полигонов
+		//vector<unsigned short> indexCount;
+		//// список координат вершин и их нормалей по индексам
+		//vector<vertexNormalTex *> indexVertexNormal;
+		//// позиция объекта
+		//vertex position;
+		//// матрицы поворота объектов
+		//vector<GLfloat *> localMatrix;
+		//// матрица поворота объекта
+		//GLfloat *directionMatrix;
+		//// буфер VBO для вершин
+		//vector<GLuint> vertexVBO;
+		// объекты
+		vector<c3dsObject *> cf_object;
 		// текстура
 		texture *tex;
 		static bool newOGL, hasVBO;
-		// поиск чанка по потоку
-		unsigned int findChunk(ifstream& ifs, unsigned short id, bool parent=true);
 		// инициализация
 		void init();
 	public:
@@ -74,26 +75,27 @@ namespace n3ds
 		void buffer();
 		// установка масштаба
 		void setScale(GLfloat scale);
-		// установка положения объекта
-		void setPosition(vertex &pos)
-		{
-			position=pos;
-			directionMatrix[12]=pos.coordinate[0];
-			directionMatrix[13]=pos.coordinate[1];
-			directionMatrix[14]=pos.coordinate[2];
-		}
+		//// установка положения объекта
+		//void setPosition(vertex &pos)
+		//{
+		//	position=pos;
+		//	directionMatrix[12]=pos.coordinate[0];
+		//	directionMatrix[13]=pos.coordinate[1];
+		//	directionMatrix[14]=pos.coordinate[2];
+		//}
 		void copyTex(texture *t)
 		{
 			tex=t;
 		}
-		GLfloat * getColor()
+		/*GLfloat * getColor()
 		{
 			return position.color;
-		}
+		}*/
 		static void checkExtensions();
 	};
 }
 
 #include "3dsMaterial.h"
+#include "3dsObject.h"
 
 #endif

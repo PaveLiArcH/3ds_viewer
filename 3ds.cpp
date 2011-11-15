@@ -21,250 +21,208 @@ namespace n3ds
 	// буферизация данных объекта в VBO
 	void c3ds::buffer()
 	{
-		if (!hasVBO) { return; } // no VBO
-		if (newOGL) // OGL>=1.5
-		{
-			for (unsigned int i=0; i<indexCount.size(); i++)
-			{
-				GLuint vBO;
-				// генерация имени для буферного объекта
-				glGenBuffers(1, &vBO);
-				// привязка буфера
-				glBindBuffer(GL_ARRAY_BUFFER, vBO);
-				// создание и инициализация области хранения данных для буферного объекта
-				glBufferData(GL_ARRAY_BUFFER, (indexCount[i])*3*sizeof(vertexNormalTex), indexVertexNormal[i], GL_STATIC_DRAW);
-				// отключение буфера
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
-				vertexVBO.push_back(vBO);
-			}
-		}
-		else // old OGL
-		{
-			for (unsigned int i=0; i<indexCount.size(); i++)
-			{
-				GLuint vBO;
-				// генерация имени для буферного объекта
-				glGenBuffersARB(1, &vBO);
-				// привязка буфера
-				glBindBufferARB(GL_ARRAY_BUFFER_ARB, vBO);
-				// создание и инициализация области хранения данных для буферного объекта
-				glBufferDataARB(GL_ARRAY_BUFFER_ARB, (indexCount[i])*3*sizeof(vertexNormalTex), indexVertexNormal[i], GL_STATIC_DRAW);
-				// отключение буфера
-				glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-				vertexVBO.push_back(vBO);
-			}
-		}
+		//if (!hasVBO) { return; } // no VBO
+		//if (newOGL) // OGL>=1.5
+		//{
+		//	for (unsigned int i=0; i<indexCount.size(); i++)
+		//	{
+		//		GLuint vBO;
+		//		// генерация имени для буферного объекта
+		//		glGenBuffers(1, &vBO);
+		//		// привязка буфера
+		//		glBindBuffer(GL_ARRAY_BUFFER, vBO);
+		//		// создание и инициализация области хранения данных для буферного объекта
+		//		glBufferData(GL_ARRAY_BUFFER, (indexCount[i])*3*sizeof(vertexNormalTex), indexVertexNormal[i], GL_STATIC_DRAW);
+		//		// отключение буфера
+		//		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		//		vertexVBO.push_back(vBO);
+		//	}
+		//}
+		//else // old OGL
+		//{
+		//	for (unsigned int i=0; i<indexCount.size(); i++)
+		//	{
+		//		GLuint vBO;
+		//		// генерация имени для буферного объекта
+		//		glGenBuffersARB(1, &vBO);
+		//		// привязка буфера
+		//		glBindBufferARB(GL_ARRAY_BUFFER_ARB, vBO);
+		//		// создание и инициализация области хранения данных для буферного объекта
+		//		glBufferDataARB(GL_ARRAY_BUFFER_ARB, (indexCount[i])*3*sizeof(vertexNormalTex), indexVertexNormal[i], GL_STATIC_DRAW);
+		//		// отключение буфера
+		//		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+		//		vertexVBO.push_back(vBO);
+		//	}
+		//}
 	}
 
 	void c3ds::init()
 	{
-		if (directionMatrix)
+		/*if (directionMatrix)
 		{
 			delete []directionMatrix;
-		}
+		}*/
 		// матрица поворота
-		directionMatrix=new GLfloat[16];
-		for (int j=0; j<4; j++)
-		{
-			for (int i=0; i<4; i++)
-			{
-				directionMatrix[j*4+i]=0; // set to zero
-			}
-			directionMatrix[j*4+j]=1; // set 1 by main diagonal
-		}
+		//directionMatrix=new GLfloat[16];
+		//for (int j=0; j<4; j++)
+		//{
+		//	for (int i=0; i<4; i++)
+		//	{
+		//		directionMatrix[j*4+i]=0; // set to zero
+		//	}
+		//	directionMatrix[j*4+j]=1; // set 1 by main diagonal
+		//}
 		// задание координат в матрице
-		directionMatrix[12]=position.coordinate[0];
+		/*directionMatrix[12]=position.coordinate[0];
 		directionMatrix[13]=position.coordinate[1];
-		directionMatrix[14]=position.coordinate[2];
+		directionMatrix[14]=position.coordinate[2];*/
 		cf_unit=1.0f;
 	}
 
 	// конструктор по умолчанию
-	c3ds::c3ds():directionMatrix(NULL),tex(NULL)
+	c3ds::c3ds():/*directionMatrix(NULL),*/tex(NULL)
 	{
-		position=vertex(0,0,0);
+		//position=vertex(0,0,0);
 		init();
 	}
 
 	// конструктор по заданной позиции
-	c3ds::c3ds(vertex &pos):directionMatrix(NULL),tex(NULL)
+	c3ds::c3ds(vertex &pos):/*directionMatrix(NULL),*/tex(NULL)
 	{
-		position=pos;
+		//position=pos;
 		init();
 	};
 
 	c3ds::~c3ds()
 	{
-		if (directionMatrix)
+		/*if (directionMatrix)
 		{
 			delete [] directionMatrix;
-		}
+		}*/
 		if (tex)
 		{
 			delete tex;
 		}
-		for (unsigned int i=0; i<indexCount.size(); i++)
+		/*for (unsigned int i=0; i<indexCount.size(); i++)
 		{
 			delete [] indexVertexNormal[i];
 			delete [] localMatrix[i];
-		}
+		}*/
 		for (unsigned int i=0; i<cf_material.size(); i++)
 		{
 			delete cf_material[i];
 		}
-		cf_name.clear();
-		indexCount.clear();
+		//cf_name.clear();
+		/*indexCount.clear();
 		indexVertexNormal.clear();
 		localMatrix.clear();
-		vertexVBO.clear();
+		vertexVBO.clear();*/
 		cf_material.clear();
 	}
 
 	void c3ds::render(int filterMode)
 	{
-		glPushMatrix(); // save current matrix
-		// применение матрицы поворота
-		glMultMatrixf(directionMatrix);
-		// установка цвета
-		glColor3f(position.color[0],position.color[1],position.color[2]);
-		if (hasVBO) // has VBO
-		{
-			if (newOGL) // OGL>=1.5
-			{
-				for (unsigned int i=0; i<indexCount.size(); i++)
-				{
-					// включение массива вершин
-					glEnableClientState(GL_VERTEX_ARRAY);
-					// включение массива нормалей
-					glEnableClientState(GL_NORMAL_ARRAY);
-					//glPushMatrix(); // save current matrix
-					//glMultMatrixf(localMatrix[i]);
-					// привязка буфера
-					glBindBuffer(GL_ARRAY_BUFFER, vertexVBO[i]);
-					// установка указателя на массив вершин по VBO
-					glVertexPointer(3, GL_FLOAT, sizeof(vertexNormalTex), (GLvoid *)((char *)indexVertexNormal[i][0].coordinate-(char *)indexVertexNormal[i]));
-					// установка указателя на массив нормалей по VBO
-					glNormalPointer(GL_FLOAT, sizeof(vertexNormalTex), (GLvoid *)((char *)indexVertexNormal[i][0].normal-(char *)indexVertexNormal[i]));
-					glEnable(GL_TEXTURE_2D);
-					glClientActiveTexture(GL_TEXTURE0);
-					// включение массива текстурных координат
-					glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-					// привязка текстуры
-					tex->bind();
-					// установка указателя на массив текстурных координат по VBO
-					//GLvoid * tmpK=(GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]);
-					glTexCoordPointer(2, GL_FLOAT, sizeof(vertexNormalTex), (GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]));
-					// отрисовка вершин
-					glDrawArrays(GL_TRIANGLES, 0, 3*indexCount[i]);
-					glDisable(GL_TEXTURE_2D);
-					// отключение массива текстурных координат
-					glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-					// отключение массива вершин
-					glDisableClientState(GL_VERTEX_ARRAY);
-					// отключение массива нормалей
-					glDisableClientState(GL_NORMAL_ARRAY);
-					// отключение буфера
-					glBindBuffer(GL_ARRAY_BUFFER, 0);
-					// отключение буфера
-					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-					//glPopMatrix(); // restore matrix
-				}
-			} else // old OGL
-			{
-				for (unsigned int i=0; i<indexCount.size(); i++)
-				{
-					// включение массива вершин
-					glEnableClientState(GL_VERTEX_ARRAY);
-					// включение массива нормалей
-					glEnableClientState(GL_NORMAL_ARRAY);
-					//glPushMatrix(); // save current matrix
-					//glMultMatrixf(localMatrix[i]);
-					// привязка буфера
-					glBindBufferARB(GL_ARRAY_BUFFER_ARB, vertexVBO[i]);
-					// установка указателя на массив вершин по VBO
-					glVertexPointer(3, GL_FLOAT, sizeof(vertexNormal), (GLvoid *)((char *)indexVertexNormal[i][0].coordinate-(char *)indexVertexNormal[i]));
-					// установка указателя на массив нормалей по VBO
-					glNormalPointer(GL_FLOAT, sizeof(vertexNormal), (GLvoid *)((char *)indexVertexNormal[i][0].normal-(char *)indexVertexNormal[i]));
-					// отрисовка вершин
-					glDrawArrays(GL_TRIANGLES, 0, 3*indexCount[i]);
-					// отключение массива вершин
-					glDisableClientState(GL_VERTEX_ARRAY);
-					// отключение массива нормалей
-					glDisableClientState(GL_NORMAL_ARRAY);
-					// отключение буфера
-					glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-					// отключение буфера
-					glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-					//glPopMatrix(); // restore matrix
-				}
-			}
-		} else // no VBO
-		{
-			for (unsigned int i=0; i<indexCount.size(); i++)
-			{
-				//glPushMatrix(); // save current matrix
-				//glMultMatrixf(localMatrix[j]);
-				glEnableClientState(GL_VERTEX_ARRAY);
-				glEnableClientState(GL_NORMAL_ARRAY);
-				glVertexPointer(3, GL_FLOAT, sizeof(vertexNormal), indexVertexNormal[i][0].coordinate);
-				glNormalPointer(GL_FLOAT, sizeof(vertexNormal), indexVertexNormal[i][0].normal);
-				glDrawArrays(GL_TRIANGLES, 0, 3*indexCount[i]);
-				glDisableClientState(GL_VERTEX_ARRAY);
-				glDisableClientState(GL_NORMAL_ARRAY);
-				//glPopMatrix(); // restore matrix
-			}
-		}
-		glPopMatrix(); // restore matrix
-	}
-
-	unsigned int c3ds::findChunk(ifstream& ifs, unsigned short id, bool parent)
-	{
-		// идентификатор чанка
-		unsigned short chunkId;
-		// длина чанка
-		unsigned int chunkLen;
-		if (parent)
-		{
-			// чтение идентификатора чанка
-			ifs.read((char*)&chunkId,2);
-			// чтение длины чанка
-			ifs.read((char*)&chunkLen,4);
-			if(chunkId==n3ds::chunks::OBJECT) // need to read object name if it is EDIT_OBJECT chunk
-			{
-				unsigned char ch;
-				do
-				{
-					ifs.read((char*)&ch,1); // reading one char
-				} while(ch!='\0' && !ifs.eof()); // reading until string ends
-			}
-		}
-		do
-		{
-			// чтение идентификатора чанка
-			ifs.read((char*)&chunkId,2);
-			// чтение длины чанка
-			ifs.read((char*)&chunkLen,4);
-
-			if(chunkId!=id) ifs.ignore(chunkLen-6); // skip if not necessary id
-			else
-			{
-				// получение текущей позиции
-				int pos=ifs.tellg();
-				// возврат к началу текущего чанка
-				ifs.seekg(pos-6);
-				// возврат текущей позиции в файле
-				return (ifs.tellg());
-			}
-		}while(!ifs.eof());
-		return false;
+		//glPushMatrix(); // save current matrix
+		//// применение матрицы поворота
+		//glMultMatrixf(directionMatrix);
+		//// установка цвета
+		//glColor3f(position.color[0],position.color[1],position.color[2]);
+		//if (hasVBO) // has VBO
+		//{
+		//	if (newOGL) // OGL>=1.5
+		//	{
+		//		for (unsigned int i=0; i<indexCount.size(); i++)
+		//		{
+		//			// включение массива вершин
+		//			glEnableClientState(GL_VERTEX_ARRAY);
+		//			// включение массива нормалей
+		//			glEnableClientState(GL_NORMAL_ARRAY);
+		//			//glPushMatrix(); // save current matrix
+		//			//glMultMatrixf(localMatrix[i]);
+		//			// привязка буфера
+		//			glBindBuffer(GL_ARRAY_BUFFER, vertexVBO[i]);
+		//			// установка указателя на массив вершин по VBO
+		//			glVertexPointer(3, GL_FLOAT, sizeof(vertexNormalTex), (GLvoid *)((char *)indexVertexNormal[i][0].coordinate-(char *)indexVertexNormal[i]));
+		//			// установка указателя на массив нормалей по VBO
+		//			glNormalPointer(GL_FLOAT, sizeof(vertexNormalTex), (GLvoid *)((char *)indexVertexNormal[i][0].normal-(char *)indexVertexNormal[i]));
+		//			glEnable(GL_TEXTURE_2D);
+		//			glClientActiveTexture(GL_TEXTURE0);
+		//			// включение массива текстурных координат
+		//			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		//			// привязка текстуры
+		//			tex->bind();
+		//			// установка указателя на массив текстурных координат по VBO
+		//			//GLvoid * tmpK=(GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]);
+		//			glTexCoordPointer(2, GL_FLOAT, sizeof(vertexNormalTex), (GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]));
+		//			// отрисовка вершин
+		//			glDrawArrays(GL_TRIANGLES, 0, 3*indexCount[i]);
+		//			glDisable(GL_TEXTURE_2D);
+		//			// отключение массива текстурных координат
+		//			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		//			// отключение массива вершин
+		//			glDisableClientState(GL_VERTEX_ARRAY);
+		//			// отключение массива нормалей
+		//			glDisableClientState(GL_NORMAL_ARRAY);
+		//			// отключение буфера
+		//			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		//			// отключение буфера
+		//			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		//			//glPopMatrix(); // restore matrix
+		//		}
+		//	} else // old OGL
+		//	{
+		//		for (unsigned int i=0; i<indexCount.size(); i++)
+		//		{
+		//			// включение массива вершин
+		//			glEnableClientState(GL_VERTEX_ARRAY);
+		//			// включение массива нормалей
+		//			glEnableClientState(GL_NORMAL_ARRAY);
+		//			//glPushMatrix(); // save current matrix
+		//			//glMultMatrixf(localMatrix[i]);
+		//			// привязка буфера
+		//			glBindBufferARB(GL_ARRAY_BUFFER_ARB, vertexVBO[i]);
+		//			// установка указателя на массив вершин по VBO
+		//			glVertexPointer(3, GL_FLOAT, sizeof(vertexNormal), (GLvoid *)((char *)indexVertexNormal[i][0].coordinate-(char *)indexVertexNormal[i]));
+		//			// установка указателя на массив нормалей по VBO
+		//			glNormalPointer(GL_FLOAT, sizeof(vertexNormal), (GLvoid *)((char *)indexVertexNormal[i][0].normal-(char *)indexVertexNormal[i]));
+		//			// отрисовка вершин
+		//			glDrawArrays(GL_TRIANGLES, 0, 3*indexCount[i]);
+		//			// отключение массива вершин
+		//			glDisableClientState(GL_VERTEX_ARRAY);
+		//			// отключение массива нормалей
+		//			glDisableClientState(GL_NORMAL_ARRAY);
+		//			// отключение буфера
+		//			glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+		//			// отключение буфера
+		//			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+		//			//glPopMatrix(); // restore matrix
+		//		}
+		//	}
+		//} else // no VBO
+		//{
+		//	for (unsigned int i=0; i<indexCount.size(); i++)
+		//	{
+		//		//glPushMatrix(); // save current matrix
+		//		//glMultMatrixf(localMatrix[j]);
+		//		glEnableClientState(GL_VERTEX_ARRAY);
+		//		glEnableClientState(GL_NORMAL_ARRAY);
+		//		glVertexPointer(3, GL_FLOAT, sizeof(vertexNormal), indexVertexNormal[i][0].coordinate);
+		//		glNormalPointer(GL_FLOAT, sizeof(vertexNormal), indexVertexNormal[i][0].normal);
+		//		glDrawArrays(GL_TRIANGLES, 0, 3*indexCount[i]);
+		//		glDisableClientState(GL_VERTEX_ARRAY);
+		//		glDisableClientState(GL_NORMAL_ARRAY);
+		//		//glPopMatrix(); // restore matrix
+		//	}
+		//}
+		//glPopMatrix(); // restore matrix
 	}
 
 	void c3ds::setScale(GLfloat scale)
 	{
-		for (int j=0; j<3; j++)
+		/*for (int j=0; j<3; j++)
 		{
 			directionMatrix[j*4+j]=scale;
-		}
+		}*/
 	}
 
 	bool c3ds::load(wstring fname)

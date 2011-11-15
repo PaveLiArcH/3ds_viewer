@@ -17,6 +17,8 @@ namespace n3ds
 			PERCENTi=0x0030, // percent (int)
 			PERCENTf=0x0031, // percent (float)
 
+			/*==============*/
+
 			PROJECT=0xC23D, // project
 			MATERIALLIB=0x3DAA, // material library
 
@@ -66,7 +68,7 @@ namespace n3ds
 						NOTCAST=0x4012, // object doesn't cast
 						MATTE=0x4013, // matte object
 						EXTERNALPROCESS=0x4015, // external process on
-						SHADOWLESS=0x4017, // object doesn't receive shadows
+						NOTSHADOWING=0x4017, // object doesn't receive shadows
 
 						/*triangular mesh*/
 						TRIMESH=0x4100, // triangular mesh

@@ -108,9 +108,11 @@ namespace n3ds
 			delete [] indexVertexNormal[i];
 			delete [] localMatrix[i];
 		}*/
-		for (unsigned int i=0; i<cf_material.size(); i++)
+		hash_map<string, c3dsMaterial *>::iterator _it;
+		_it=cf_material.begin();
+		for (; _it!=cf_material.end(); _it++)
 		{
-			delete cf_material[i];
+			delete (_it->second);
 		}
 		//cf_name.clear();
 		/*indexCount.clear();

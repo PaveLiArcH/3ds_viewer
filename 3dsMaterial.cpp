@@ -42,6 +42,11 @@ namespace n3ds
 		cf_materialName=a_name;
 	}
 
+	std::string c3dsMaterial::GetMaterialName()
+	{
+		return cf_materialName;
+	}
+
 	void c3dsMaterial::SetAmbient(tFloat *a_ambient)
 	{
 		if (a_ambient)

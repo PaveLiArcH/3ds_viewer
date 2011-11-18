@@ -26,6 +26,8 @@ namespace n3ds
 		c3dsMaterial(tFloat *amb, tFloat *diff=NULL, tFloat *spec=NULL, tFloat *emiss=NULL, tFloat shin=0.0f);
 		// установка имени материала
 		void SetMaterialName(std::string a_name);
+		// получение имени материала
+		std::string GetMaterialName();
 		// установка амбиентной составл€ющей
 		void SetAmbient(tFloat *a_ambient);
 		// установка диффузной составл€ющей

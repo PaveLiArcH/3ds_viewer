@@ -101,10 +101,11 @@ namespace n3ds
 	bool c3dsLoader::cm_chunkReaderMaterialBlock (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
 	{
 		std::cerr<<"Найден чанк блока материала "<<std::hex<<a_header.id<<std::endl;
-		a_object.cf_material.push_back(new c3dsMaterial);
+		c3dsMaterial *_material=new c3dsMaterial();
 		std::streamoff _maxoff=a_istream.tellg();
 		_maxoff=_maxoff+(a_header.len-6);
-		bool _res=cm_chunkReaderMaterial(a_istream, _maxoff, a_object);
+		bool _res=cm_chunkReaderMaterial(a_istream, _maxoff, _material);
+		a_object.cf_material[_material->GetMaterialName()]=_material;
 		return true;
 	}
 
@@ -277,9 +278,9 @@ namespace n3ds
 		tChunkID *_indexList=new tChunkID[_indexCount*3];
 		for (int i=0; i<_indexCount; i++)
 		{
-			a_istream.read((char*)&(_indexList[3*i]),4);
-			a_istream.read((char*)&(_indexList[3*i+2]),4);
-			a_istream.read((char*)&(_indexList[3*i+1]),4);
+			a_istream.read((char*)&(_indexList[3*i]),2);
+			a_istream.read((char*)&(_indexList[3*i+2]),2);
+			a_istream.read((char*)&(_indexList[3*i+1]),2);
 			a_istream.ignore(2); //ToDo: прочитать флаги видимости
 		}
 		a_object.cf_object.back()->SetIndexCount(_indexCount);
@@ -302,14 +303,14 @@ namespace n3ds
 	#pragma endregion Объектные тримеш-чанки
 
 	#pragma region MaterialChunks
-	bool c3dsLoader::cm_chunkReaderMaterial (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object)
+	bool c3dsLoader::cm_chunkReaderMaterial (tistream & a_istream, std::streamoff & a_maxoffset, c3dsMaterial * a_material)
 	{
 		s3dsHeader _header;
 		bool _res;
 		while ((a_istream.tellg()<a_maxoffset)&&!(a_istream.fail()||a_istream.eof()||((a_istream>>_header).eof())))
 		{
 			ptChunkReaderMaterial _chunkReaderMaterial=cm_getChunkReaderMaterial(_header);
-			_res=(*_chunkReaderMaterial)(a_istream, _header, a_object);
+			_res=(*_chunkReaderMaterial)(a_istream, _header, a_material);
 		}
 		return true;
 	}
@@ -341,7 +342,7 @@ namespace n3ds
 		}
 	}
 
-	bool c3dsLoader::cm_chunkReaderMaterialName (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	bool c3dsLoader::cm_chunkReaderMaterialName (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material)
 	{
 		std::cerr<<"Найден чанк названия материала "<<std::hex<<a_header.id<<std::endl;
 		char _c;
@@ -350,91 +351,91 @@ namespace n3ds
 		{
 			_temp+=_c;
 		}
-		a_object.cf_material.back()->SetMaterialName(_temp);
+		a_material->SetMaterialName(_temp);
 		return true;
 	}
 
-	bool c3dsLoader::cm_chunkReaderMaterialAmbient (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	bool c3dsLoader::cm_chunkReaderMaterialAmbient (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material)
 	{
 		std::cerr<<"Найден чанк амбиентной составляющей материала "<<std::hex<<a_header.id<<std::endl;
 		std::streamoff _maxoff=a_istream.tellg();
 		_maxoff=_maxoff+(a_header.len-6);
 		tVec _color=cm_chunkReaderColor(a_istream, _maxoff);
-		a_object.cf_material.back()->SetAmbient(_color);
+		a_material->SetAmbient(_color);
 		return true;
 	}
 
-	bool c3dsLoader::cm_chunkReaderMaterialDiffuse (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	bool c3dsLoader::cm_chunkReaderMaterialDiffuse (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material)
 	{
 		std::cerr<<"Найден чанк диффузной составляющей материала "<<std::hex<<a_header.id<<std::endl;
 		std::streamoff _maxoff=a_istream.tellg();
 		_maxoff=_maxoff+(a_header.len-6);
 		tVec _color=cm_chunkReaderColor(a_istream, _maxoff);
-		a_object.cf_material.back()->SetDiffuse(_color);
+		a_material->SetDiffuse(_color);
 		return true;
 	}
 
-	bool c3dsLoader::cm_chunkReaderMaterialSpecular (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	bool c3dsLoader::cm_chunkReaderMaterialSpecular (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material)
 	{
 		std::cerr<<"Найден чанк спекулярной составляющей материала "<<std::hex<<a_header.id<<std::endl;
 		std::streamoff _maxoff=a_istream.tellg();
 		_maxoff=_maxoff+(a_header.len-6);
 		tVec _color=cm_chunkReaderColor(a_istream, _maxoff);
-		a_object.cf_material.back()->SetSpecular(_color);
+		a_material->SetSpecular(_color);
 		return true;
 	}
 
-	bool c3dsLoader::cm_chunkReaderMaterialShininess (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	bool c3dsLoader::cm_chunkReaderMaterialShininess (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material)
 	{
 		std::cerr<<"Найден чанк блесковой составляющей материала "<<std::hex<<a_header.id<<std::endl;
 		std::streamoff _maxoff=a_istream.tellg();
 		_maxoff=_maxoff+(a_header.len-6);
 		tFloat _percent=cm_chunkReaderPercent(a_istream, _maxoff);
-		a_object.cf_material.back()->SetShininessPercent(_percent);
+		a_material->SetShininessPercent(_percent);
 		return true;
 	}
 
-	bool c3dsLoader::cm_chunkReaderMaterialShininessStrength (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	bool c3dsLoader::cm_chunkReaderMaterialShininessStrength (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material)
 	{
 		std::cerr<<"Найден чанк силы блесковой составляющей материала "<<std::hex<<a_header.id<<std::endl;
 		std::streamoff _maxoff=a_istream.tellg();
 		_maxoff=_maxoff+(a_header.len-6);
 		tFloat _percent=cm_chunkReaderPercent(a_istream, _maxoff);
-		a_object.cf_material.back()->SetShininessStrengthPercent(_percent);
+		a_material->SetShininessStrengthPercent(_percent);
 		return true;
 	}
 
-	bool c3dsLoader::cm_chunkReaderMaterialTransparency (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	bool c3dsLoader::cm_chunkReaderMaterialTransparency (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material)
 	{
 		std::cerr<<"Найден чанк прозрачной составляющей материала "<<std::hex<<a_header.id<<std::endl;
 		std::streamoff _maxoff=a_istream.tellg();
 		_maxoff=_maxoff+(a_header.len-6);
 		tFloat _percent=cm_chunkReaderPercent(a_istream, _maxoff);
-		a_object.cf_material.back()->SetTransparencyPercent(_percent);
+		a_material->SetTransparencyPercent(_percent);
 		return true;
 	}
 
-	bool c3dsLoader::cm_chunkReaderMaterialTransparencyFalloff (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	bool c3dsLoader::cm_chunkReaderMaterialTransparencyFalloff (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material)
 	{
 		std::cerr<<"Найден чанк спада прозрачной составляющей материала "<<std::hex<<a_header.id<<std::endl;
 		std::streamoff _maxoff=a_istream.tellg();
 		_maxoff=_maxoff+(a_header.len-6);
 		tFloat _percent=cm_chunkReaderPercent(a_istream, _maxoff);
-		a_object.cf_material.back()->SetTransparencyFalloffPercent(_percent);
+		a_material->SetTransparencyFalloffPercent(_percent);
 		return true;
 	}
 
-	bool c3dsLoader::cm_chunkReaderMaterialReflectionBlur (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	bool c3dsLoader::cm_chunkReaderMaterialReflectionBlur (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material)
 	{
 		std::cerr<<"Найден чанк размытости отражения материала "<<std::hex<<a_header.id<<std::endl;
 		std::streamoff _maxoff=a_istream.tellg();
 		_maxoff=_maxoff+(a_header.len-6);
 		tFloat _percent=cm_chunkReaderPercent(a_istream, _maxoff);
-		a_object.cf_material.back()->SetReflectionBlurPercent(_percent);
+		a_material->SetReflectionBlurPercent(_percent);
 		return true;
 	}
 
-	bool c3dsLoader::cm_chunkReaderMaterialUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	bool c3dsLoader::cm_chunkReaderMaterialUnknown (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material)
 	{
 		std::cerr<<"Найден неизвестный чанк "<<std::hex<<a_header.id<<" в блоке материальных чанков"<<std::endl;
 		if (a_header.len<6)

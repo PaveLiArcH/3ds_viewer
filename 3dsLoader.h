@@ -7,11 +7,12 @@ namespace n3ds
 {
 	struct s3dsHeader;
 	class c3ds;
+	class c3dsMaterial;
 
 	typedef bool (*ptChunkReader) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 	typedef tVec (*ptChunkReaderColor) (tistream & a_istream, s3dsHeader & a_header);
 	typedef tFloat (*ptChunkReaderPercent) (tistream & a_istream, s3dsHeader & a_header);
-	typedef bool (*ptChunkReaderMaterial) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
+	typedef bool (*ptChunkReaderMaterial) (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
 	typedef bool (*ptChunkReaderObject) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 	typedef bool (*ptChunkReaderObjectTrimesh) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 
@@ -50,17 +51,17 @@ namespace n3ds
 
 		#pragma region MaterialChunks
 		static ptChunkReaderMaterial cm_getChunkReaderMaterial(s3dsHeader & a_header);
-		static bool cm_chunkReaderMaterial (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object);
-		static bool cm_chunkReaderMaterialName (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
-		static bool cm_chunkReaderMaterialAmbient (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
-		static bool cm_chunkReaderMaterialDiffuse (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
-		static bool cm_chunkReaderMaterialSpecular (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
-		static bool cm_chunkReaderMaterialShininess (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
-		static bool cm_chunkReaderMaterialShininessStrength (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
-		static bool cm_chunkReaderMaterialTransparency (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
-		static bool cm_chunkReaderMaterialTransparencyFalloff (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
-		static bool cm_chunkReaderMaterialReflectionBlur (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
-		static bool cm_chunkReaderMaterialUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
+		static bool cm_chunkReaderMaterial (tistream & a_istream, std::streamoff & a_maxoffset, c3dsMaterial * a_material);
+		static bool cm_chunkReaderMaterialName (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
+		static bool cm_chunkReaderMaterialAmbient (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
+		static bool cm_chunkReaderMaterialDiffuse (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
+		static bool cm_chunkReaderMaterialSpecular (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
+		static bool cm_chunkReaderMaterialShininess (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
+		static bool cm_chunkReaderMaterialShininessStrength (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
+		static bool cm_chunkReaderMaterialTransparency (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
+		static bool cm_chunkReaderMaterialTransparencyFalloff (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
+		static bool cm_chunkReaderMaterialReflectionBlur (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
+		static bool cm_chunkReaderMaterialUnknown (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
 		#pragma endregion Материальные чанки
 
 		#pragma region ColorChunks

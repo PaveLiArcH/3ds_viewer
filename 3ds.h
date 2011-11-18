@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <hash_map>
 //glm
 #include "glm/glm.hpp"
 //glut
@@ -26,6 +27,14 @@ namespace n3ds
 	class c3dsMaterial;
 	class c3dsObject;
 
+	struct eqstr
+	{
+		bool operator()(const char* s1, const char* s2) const
+		{
+			return strcmp(s1, s2) == 0;
+		}
+	};
+
 	class c3ds
 	{
 		friend class n3ds::c3dsLoader;
@@ -38,7 +47,7 @@ namespace n3ds
 		// имя объекта
 		//vector<string> cf_name;
 		// материалы
-		vector<c3dsMaterial *> cf_material;
+		hash_map<string, c3dsMaterial *> cf_material;
 		// величина единицы
 		tFloat cf_unit;
 		//// количество полигонов

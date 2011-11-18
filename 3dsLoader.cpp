@@ -161,6 +161,8 @@ namespace n3ds
 			return &cm_chunkReaderObjectMatte;
 		case(chunks::EXTERNALPROCESS):
 			return &cm_chunkReaderObjectExternalProcessed;
+		case(chunks::TRIMESH):
+			return &cm_chunkReaderObjectTrimeshBlock;
 		default:
 			return &cm_chunkReaderObjectUnknown;
 		}
@@ -201,6 +203,15 @@ namespace n3ds
 		return true;
 	}
 
+	bool c3dsLoader::cm_chunkReaderObjectTrimeshBlock (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден чанк тримеш блока объекта "<<std::hex<<a_header.id<<std::endl;
+		std::streamoff _maxoff=a_istream.tellg();
+		_maxoff=_maxoff+(a_header.len-6);
+		bool _res=cm_chunkReaderObjectTrimesh(a_istream, _maxoff, a_object);
+		return true;
+	}
+
 	bool c3dsLoader::cm_chunkReaderObjectUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
 	{
 		std::cerr<<"Найден неизвестный чанк "<<std::hex<<a_header.id<<" в блоке объектных чанков"<<std::endl;
@@ -216,35 +227,77 @@ namespace n3ds
 	#pragma endregion Объектные чанки
 	
 	#pragma region ObjectTrimeshChunks
-	bool c3dsLoader::cm_chunkReaderObject (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object)
+	bool c3dsLoader::cm_chunkReaderObjectTrimesh (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object)
 	{
 		s3dsHeader _header;
 		bool _res;
 		while ((a_istream.tellg()<a_maxoffset)&&!(a_istream.fail()||a_istream.eof()||((a_istream>>_header).eof())))
 		{
-			ptChunkReaderObject _chunkReaderObject=cm_getChunkReaderObject(_header);
-			_res=(*_chunkReaderObject)(a_istream, _header, a_object);
+			ptChunkReaderObjectTrimesh _chunkReaderObjectTrimesh=cm_getChunkReaderObjectTrimesh(_header);
+			_res=(*_chunkReaderObjectTrimesh)(a_istream, _header, a_object);
 		}
 		return true;
 	}
 
-	ptChunkReaderObject c3dsLoader::cm_getChunkReaderObject(s3dsHeader & a_header)
+	ptChunkReaderObjectTrimesh c3dsLoader::cm_getChunkReaderObjectTrimesh(s3dsHeader & a_header)
 	{
 		switch (a_header.id)
 		{
-		case(chunks::HIDDEN):
-			return &cm_chunkReaderObjectHidden;
-		case(chunks::NOTSHADOWING):
-			return &cm_chunkReaderObjectNotShadowing;
-		case(chunks::NOTCAST):
-			return &cm_chunkReaderObjectNotCast;
-		case(chunks::MATTE):
-			return &cm_chunkReaderObjectMatte;
-		case(chunks::EXTERNALPROCESS):
-			return &cm_chunkReaderObjectExternalProcessed;
+		case (chunks::VERTEXLIST):
+			return &cm_chunkReaderObjectTrimeshVertexList;
+		case (chunks::FACESLIST):
+			return &cm_chunkReaderObjectTrimeshFaceList;
 		default:
-			return &cm_chunkReaderObjectUnknown;
+			return &cm_chunkReaderObjectTrimeshUnknown;
 		}
+	}
+
+	bool c3dsLoader::cm_chunkReaderObjectTrimeshVertexList (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден чанк координат вертексов объекта "<<std::hex<<a_header.id<<std::endl;
+		tChunkID _vertexCount=0;
+		a_istream.read((char *)&_vertexCount, 2);
+		tFloat *_vertexList=new tFloat[_vertexCount*3];
+		for (int i=0; i<_vertexCount; i++)
+		{
+			a_istream.read((char*)&(_vertexList[3*i]),4);
+			a_istream.read((char*)&(_vertexList[3*i+2]),4);
+			a_istream.read((char*)&(_vertexList[3*i+1]),4);
+		}
+		a_object.cf_object.back()->SetVerticesCount(_vertexCount);
+		a_object.cf_object.back()->SetVerticesList(_vertexList);
+		return true;
+	}
+
+	bool c3dsLoader::cm_chunkReaderObjectTrimeshFaceList (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден чанк индексов вертексов объекта "<<std::hex<<a_header.id<<std::endl;
+		tChunkID _indexCount=0;
+		a_istream.read((char *)&_indexCount, 2);
+		tChunkID *_indexList=new tChunkID[_indexCount*3];
+		for (int i=0; i<_indexCount; i++)
+		{
+			a_istream.read((char*)&(_indexList[3*i]),4);
+			a_istream.read((char*)&(_indexList[3*i+2]),4);
+			a_istream.read((char*)&(_indexList[3*i+1]),4);
+			a_istream.ignore(2); //ToDo: прочитать флаги видимости
+		}
+		a_object.cf_object.back()->SetIndexCount(_indexCount);
+		a_object.cf_object.back()->SetIndexList(_indexList);
+		return true;
+	}
+
+	bool c3dsLoader::cm_chunkReaderObjectTrimeshUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден неизвестный чанк "<<std::hex<<a_header.id<<" в блоке объектных тримеш-чанков"<<std::endl;
+		if (a_header.len<6)
+		{
+			std::cerr<<"\tНекорректная длина чанка"<<std::endl;
+			// TODO throw an exception
+			return false;
+		}
+		a_istream.seekg(a_header.len-6, std::ios::cur);
+		return true;
 	}
 	#pragma endregion Объектные тримеш-чанки
 

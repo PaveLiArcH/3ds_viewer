@@ -23,11 +23,11 @@ namespace n3ds
 		// список координат вертексов
 		tFloat *cf_verticesList;
 		// число вертексов
-		tUint cf_verticesCount;
+		tChunkID cf_verticesCount;
 		// список индексов
-		tUint *cf_indexList;
+		tChunkID *cf_indexList;
 		// число индексов
-		tUint cf_indexCount;
+		tChunkID cf_indexCount;
 
 	public:
 		c3dsObject();
@@ -37,6 +37,10 @@ namespace n3ds
 		void SetNotCast(bool a_notCast);
 		void SetMatte(bool a_matte);
 		void SetExternalProcessed(bool a_externalProcessed);
+		void SetVerticesList(tFloat *a_verticesList);
+		void SetVerticesCount(tChunkID a_verticesCount);
+		void SetIndexList(tChunkID *a_indexList);
+		void SetIndexCount(tChunkID a_indexCount);
 	};
 }
 

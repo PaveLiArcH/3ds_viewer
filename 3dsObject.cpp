@@ -40,4 +40,24 @@ namespace n3ds
 	{
 		cf_externalProcessed=a_externalProcessed;
 	}
+
+	void c3dsObject::SetVerticesList(tFloat *a_verticesList)
+	{
+		cf_verticesList=a_verticesList;
+	}
+
+	void c3dsObject::SetVerticesCount(tChunkID a_verticesCount)
+	{
+		cf_verticesCount=a_verticesCount;
+	}
+
+	void c3dsObject::SetIndexList(tChunkID *a_indexList)
+	{
+		cf_indexList=a_indexList;
+	}
+
+	void c3dsObject::SetIndexCount(tChunkID a_indexCount)
+	{
+		cf_indexCount=a_indexCount;
+	}
 }

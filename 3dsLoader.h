@@ -43,7 +43,8 @@ namespace n3ds
 		#pragma region ObjectTrimeshChunks
 		static ptChunkReaderObjectTrimesh cm_getChunkReaderObjectTrimesh(s3dsHeader & a_header);
 		static bool cm_chunkReaderObjectTrimesh (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object);
-		static bool cm_chunkReaderObjectTrimeshVertexList (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object);
+		static bool cm_chunkReaderObjectTrimeshVertexList (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
+		static bool cm_chunkReaderObjectTrimeshFaceList (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		static bool cm_chunkReaderObjectTrimeshUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		#pragma endregion Объектные тримеш-чанки
 

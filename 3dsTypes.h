@@ -4,7 +4,7 @@
 #include <iostream>
 #include "GLee.h"
 
-namespace n3ds
+namespace ns_3ds
 {
 	typedef GLfloat tFloat;
 	typedef GLint tInt;

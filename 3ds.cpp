@@ -6,7 +6,7 @@
 
 using namespace std;
 
-namespace n3ds
+namespace ns_3ds
 {
 
 	bool c3ds::newOGL=false;
@@ -259,16 +259,16 @@ namespace n3ds
 		else
 		{
 			// чтение идентификатора чанка
-			return n3ds::c3dsLoader::load(ifs, *this);
+			return ns_3ds::c3dsLoader::load(ifs, *this);
 		}
 			//ifs.read((char*)&chunkId,2);
 			//// чтение длины чанка
 			//ifs.read((char*)&chunkLen,4);
-			//if(chunkId!=n3ds::chunks::MAIN) return false; // not 3ds
+			//if(chunkId!=ns_3ds::chunks::MAIN) return false; // not 3ds
 			//// перемещение к началу чанка
 			//ifs.seekg((int)ifs.tellg()-6);
 			//// поиск следующего необходимого чанка
-			//chunkPos=findChunk(ifs,n3ds::chunks::EDITOR);
+			//chunkPos=findChunk(ifs,ns_3ds::chunks::EDITOR);
 			//if(chunkPos==0) return false; // not found
 			//// чтение идентификатора чанка
 			//ifs.read((char*)&chunkId,2);
@@ -281,7 +281,7 @@ namespace n3ds
 
 			//// сохранение положения чанка
 			//chunkTmpPos=ifs.tellg();
-			//chunkPos=findChunk(ifs,n3ds::chunks::ONEUNIT,false);
+			//chunkPos=findChunk(ifs,ns_3ds::chunks::ONEUNIT,false);
 			//if(chunkPos!=0) // found
 			//{
 			//	ifs.ignore(6);
@@ -320,7 +320,7 @@ namespace n3ds
 
 			//	lastFailed=false;
 			//	// поиск следующего необходимого чанка
-			//	chunkPos=findChunk(ifs,n3ds::chunks::OBJECT,false);
+			//	chunkPos=findChunk(ifs,ns_3ds::chunks::OBJECT,false);
 			//	if(chunkPos==0) { lastFailed=(chunkPos==0); break; }//return false; // not found
 			//	chunkModelPos=chunkPos;
 			//	ifs.read((char*)&chunkId,2);
@@ -344,13 +344,13 @@ namespace n3ds
 			//	ifs.seekg(chunkTmpPos);
 
 			//	// поиск следующего необходимого чанка
-			//	chunkPos=findChunk(ifs,n3ds::chunks::TRIMESH,false);
+			//	chunkPos=findChunk(ifs,ns_3ds::chunks::TRIMESH,false);
 			//	if(chunkPos==0) { lastFailed=(chunkPos==0); break; } // not found
 			//	
 			//	chunkTmpPos=chunkPos;
 
 			//	// поиск следующего необходимого чанка
-			//	chunkPos=findChunk(ifs,n3ds::chunks::VERTEXLIST);
+			//	chunkPos=findChunk(ifs,ns_3ds::chunks::VERTEXLIST);
 			//	if(chunkPos==0) return false; // not found
 			//	// пропуск 6 байтов (chunkId, chunkLen)
 			//	ifs.ignore(6);
@@ -369,7 +369,7 @@ namespace n3ds
 			//	ifs.seekg(chunkTmpPos);
 
 			//	// поиск следующего необходимого чанка
-			//	chunkPos=findChunk(ifs,n3ds::chunks::MAPPINGCOORDS);
+			//	chunkPos=findChunk(ifs,ns_3ds::chunks::MAPPINGCOORDS);
 			//	if(chunkPos==0) return false; // not found
 			//	// пропуск 6 байтов (chunkId, chunkLen)
 			//	ifs.ignore(6);
@@ -387,7 +387,7 @@ namespace n3ds
 			//	ifs.seekg(chunkTmpPos);
 
 			//	// поиск следующего необходимого чанка
-			//	chunkPos=findChunk(ifs,n3ds::chunks::FACESLIST);
+			//	chunkPos=findChunk(ifs,ns_3ds::chunks::FACESLIST);
 			//	if(chunkPos==0) { lastFailed=(chunkPos==0); break; } // not found
 			//	// пропуск 6 байтов (chunkId, chunkLen)
 			//	ifs.ignore(6);
@@ -418,7 +418,7 @@ namespace n3ds
 			//	// возврат к сохраненному положению
 			//	ifs.seekg(chunkTmpPos);
 			//	// поиск следующего необходимого чанка
-			//	chunkPos=findChunk(ifs,n3ds::chunks::LOCALMATRIX);
+			//	chunkPos=findChunk(ifs,ns_3ds::chunks::LOCALMATRIX);
 			//	if(chunkPos!=0) // found
 			//	{
 			//		lMatrix=new GLfloat[16];

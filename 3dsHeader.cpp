@@ -1,6 +1,6 @@
 #include "3dsHeader.h"
 
-namespace n3ds
+namespace ns_3ds
 {
 	tistream & operator >> (tistream &a_istream, s3dsHeader &a_header)
 	{

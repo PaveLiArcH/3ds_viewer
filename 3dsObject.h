@@ -3,8 +3,10 @@
 
 #include <string>
 #include "3dsTypes.h"
+#include <hash_map>
+#include <vector>
 
-namespace n3ds
+namespace ns_3ds
 {
 	class c3dsObject
 	{
@@ -28,6 +30,12 @@ namespace n3ds
 		tChunkID *cf_indexList;
 		// число индексов
 		tChunkID cf_indexCount;
+		// материалы сторон
+		stdext::hash_map<std::string, std::vector<tChunkID> *> cf_faceMaterial;
+		// список текстурных координат вертексов
+		tFloat *cf_texList;
+		// число вертексов
+		tChunkID cf_texCount;
 
 	public:
 		c3dsObject();
@@ -41,6 +49,9 @@ namespace n3ds
 		void SetVerticesCount(tChunkID a_verticesCount);
 		void SetIndexList(tChunkID *a_indexList);
 		void SetIndexCount(tChunkID a_indexCount);
+		void SetFaceMaterial(std::string a_materialName, std::vector<tChunkID> *a_faces);
+		void SetTexList(tFloat *a_texList);
+		void SetTexCount(tChunkID a_texCount);
 	};
 }
 

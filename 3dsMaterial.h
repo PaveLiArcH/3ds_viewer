@@ -4,7 +4,7 @@
 #include <string>
 #include "3dsTypes.h"
 
-namespace n3ds
+namespace ns_3ds
 {
 	class c3dsMaterial
 	{

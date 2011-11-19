@@ -173,12 +173,12 @@ GLfloat dirLig2[3]={
 ILuint devilError;
 texture surfaceTex;
 
-n3ds::c3ds *object;
+ns_3ds::c3ds *object;
 bool newOGL=false,hasVBO=false,hasFragmentShader=false,hasVertexShader=false;
 camera *cam;
 
 shader modelShader,planeShader;
-n3ds::c3dsMaterial planeMaterial=n3ds::c3dsMaterial(ambMat,difMat,speMat,0,64.0f);
+ns_3ds::c3dsMaterial planeMaterial=ns_3ds::c3dsMaterial(ambMat,difMat,speMat,0,64.0f);
 lightSource firstLight=lightSource(ambLig1,difLig1,speLig1,posLig1,dirLig1);
 lightSource secondLight=lightSource(ambLig2,difLig2,speLig2,posLig2,dirLig2);
 
@@ -530,7 +530,7 @@ void wmain (int argc, wchar_t **argv)
 	newOGL=atof((const char *)glGetString(GL_VERSION))>=1.5f; // check OGL version
 
 	// проверяем наличие необходимых расширений
-	n3ds::c3ds::checkExtensions();
+	ns_3ds::c3ds::checkExtensions();
 	shader::checkExtensions();
 
 	if (!hasVBO) { printf("VBO does not supported\n"); } // no VBO
@@ -550,7 +550,7 @@ void wmain (int argc, wchar_t **argv)
 	ilutRenderer(ILUT_OPENGL);
 
 	// загрузка объектов по файлу конфигурации
-	object=new n3ds::c3ds();
+	object=new ns_3ds::c3ds();
 	object->load(_3dsFile);
 	
 	object->buffer(); // buffer objects to VBO

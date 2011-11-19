@@ -1,7 +1,7 @@
 #include <math.h>
 #include "3dsMaterial.h"
 
-namespace n3ds
+namespace ns_3ds
 {
 	c3dsMaterial::c3dsMaterial()
 	{

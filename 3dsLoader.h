@@ -3,7 +3,7 @@
 
 #include "3dsTypes.h"
 
-namespace n3ds
+namespace ns_3ds
 {
 	struct s3dsHeader;
 	class c3ds;
@@ -15,7 +15,7 @@ namespace n3ds
 	typedef bool (*ptChunkReaderMaterial) (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
 	typedef bool (*ptChunkReaderObject) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 	typedef bool (*ptChunkReaderObjectTrimesh) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
-
+	typedef bool (*ptChunkReaderObjectTrimeshFace) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 	class c3dsLoader
 	{
 		static ptChunkReader cm_getChunkReader(s3dsHeader & a_header);
@@ -46,8 +46,17 @@ namespace n3ds
 		static bool cm_chunkReaderObjectTrimesh (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object);
 		static bool cm_chunkReaderObjectTrimeshVertexList (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		static bool cm_chunkReaderObjectTrimeshFaceList (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
+		static bool cm_chunkReaderObjectTrimeshMappingList (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		static bool cm_chunkReaderObjectTrimeshUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		#pragma endregion Объектные тримеш-чанки
+
+		#pragma region ObjectTrimeshFaceChunks
+		static ptChunkReaderObjectTrimeshFace cm_getChunkReaderObjectTrimeshFace(s3dsHeader & a_header);
+		static bool cm_chunkReaderObjectTrimeshFace (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object);
+		static bool cm_chunkReaderObjectTrimeshFaceMaterialList (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
+		static bool cm_chunkReaderObjectTrimeshFaceSmoothList (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
+		static bool cm_chunkReaderObjectTrimeshFaceUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
+		#pragma endregion Объектные тримеш чанки сторон
 
 		#pragma region MaterialChunks
 		static ptChunkReaderMaterial cm_getChunkReaderMaterial(s3dsHeader & a_header);

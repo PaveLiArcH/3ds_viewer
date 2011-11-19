@@ -1,7 +1,7 @@
 #include <math.h>
 #include "3dsObject.h"
 
-namespace n3ds
+namespace ns_3ds
 {
 	c3dsObject::c3dsObject()
 	{
@@ -13,6 +13,7 @@ namespace n3ds
 
 	void c3dsObject::SetName(std::string a_name)
 	{
+		//ToDo: сделать проверку на уже заданное имя
 		cf_name=a_name;
 	}
 
@@ -43,21 +44,43 @@ namespace n3ds
 
 	void c3dsObject::SetVerticesList(tFloat *a_verticesList)
 	{
+		//ToDo: сделать проверку на уже заданный список вертексов
 		cf_verticesList=a_verticesList;
 	}
 
 	void c3dsObject::SetVerticesCount(tChunkID a_verticesCount)
 	{
+		//ToDo: сделать проверку на уже заданный список вертексов
 		cf_verticesCount=a_verticesCount;
 	}
 
 	void c3dsObject::SetIndexList(tChunkID *a_indexList)
 	{
+		//ToDo: сделать проверку на уже заданный список индексов
 		cf_indexList=a_indexList;
 	}
 
 	void c3dsObject::SetIndexCount(tChunkID a_indexCount)
 	{
+		//ToDo: сделать проверку на уже заданный список индексов
 		cf_indexCount=a_indexCount;
+	}
+
+	void c3dsObject::SetFaceMaterial(std::string a_materialName, std::vector<tChunkID> *a_faces)
+	{
+		//ToDo: сделать проверку на уже заданный материал
+		cf_faceMaterial[a_materialName]=a_faces;
+	}
+
+	void c3dsObject::SetTexList(tFloat *a_texList)
+	{
+		//ToDo: сделать проверку на уже заданные текстурные координаты вертексов
+		cf_texList=a_texList;
+	}
+
+	void c3dsObject::SetTexCount(tChunkID a_texCount)
+	{
+		//ToDo: сделать проверку на уже заданные текстурные координаты вертексов
+		cf_texCount=a_texCount;
 	}
 }

@@ -1,7 +1,7 @@
 #ifndef __3dsChunks_h__
 #define __3dsChunks_h__
 
-namespace n3ds
+namespace ns_3ds
 {
 	namespace chunks
 	{

@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "3dsTypes.h"
 
-namespace n3ds
+namespace ns_3ds
 {
 	struct s3dsHeader
 	{

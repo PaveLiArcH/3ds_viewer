@@ -15,7 +15,6 @@
 //self implemented
 #include "vertex.h"
 #include "texture.h"
-
 #include "3dsTypes.h"
 #include "3dsLoader.h"
 
@@ -26,14 +25,6 @@ namespace ns_3ds
 {
 	class c3dsMaterial;
 	class c3dsObject;
-
-	struct eqstr
-	{
-		bool operator()(const char* s1, const char* s2) const
-		{
-			return strcmp(s1, s2) == 0;
-		}
-	};
 
 	class c3ds
 	{

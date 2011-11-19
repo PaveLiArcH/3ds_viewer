@@ -1,4 +1,3 @@
-//#define _HAS_ITERATOR_DEBUGGING 0
 // catch mem leaks
 //#include <vld.h>
 //Glee
@@ -26,6 +25,9 @@ using namespace glm;
 using namespace std;
 
 std::ofstream _cerr;
+
+// переменная для чтения пути к модели
+std::wstring _3dsFile;
 
 int frame=0,time,timebase=0,w,h,delayPerFrames=20,filterMode=0,g_nMaxAnisotropy;
 char s[20];
@@ -475,14 +477,67 @@ void onExit()
 	}
 	delete cam;
 	delete object;
+	_3dsFile.empty();
+}
+
+#include <CommDlg.h>
+
+std::wstring openFileNameW(wchar_t *a_filter = L"All Files (*.*)\0*.*\0", HWND a_owner = NULL)
+{
+	std::wstring _retStr;
+
+	OPENFILENAMEW _openFileName;
+	wchar_t _fileName[MAX_PATH]=L"";
+	ZeroMemory(&_openFileName,sizeof(_openFileName));
+ 
+	_openFileName.lStructSize=sizeof(OPENFILENAME);
+	_openFileName.hwndOwner=a_owner;
+	_openFileName.lpstrFilter=a_filter;
+	_openFileName.lpstrFile=_fileName;
+	_openFileName.nMaxFile=MAX_PATH;
+	_openFileName.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+	_openFileName.lpstrDefExt=L"3ds";
+ 
+	if(GetOpenFileNameW(&_openFileName))
+	{
+		_retStr = _fileName;
+	}
+ 
+	return _retStr;
+}
+
+#include "3dsChunks.h"
+
+bool check3ds(std::wstring a_fileName)
+{
+	bool _retVal=true;
+	ifstream _ifs;
+	_ifs.open(a_fileName.c_str(),ios_base::in|ios_base::binary|ios_base::beg);
+	if(!_ifs.is_open())
+	{
+		std::cerr<<"Возникли ошибки (не удалось открыть файл) при попытке чтения файла "<<ns_3ds::wstringToString(a_fileName)<<std::endl;
+		std::wcerr<<L"Возникли ошибки (не удалось открыть файл) при попытке чтения файла "<<a_fileName<<std::endl;
+		// error while opening file
+		_retVal=false;
+	} else
+	{
+		ns_3ds::tChunkID _chunkID;
+		_ifs.read((char *)&_chunkID,2);
+		if (_chunkID!=ns_3ds::chunks::MAIN)
+		{
+			_retVal=false;
+			std::cerr<<"Возникли ошибки (некорректный стартовый чанк) при попытке чтения файла "<<ns_3ds::wstringToString(a_fileName)<<std::endl;
+			std::wcerr<<L"Возникли ошибки (некорректный стартовый чанк) при попытке чтения файла "<<a_fileName<<std::endl;
+		}
+		_ifs.close();
+	}
+	return _retVal;
 }
 
 void wmain (int argc, wchar_t **argv)
 {
 	// установка локали для консоли
 	_wsetlocale(LC_ALL, L"");
-	// переменная для чтения пути к модели
-	wstring _3dsFile;
 	// создание файла лога работы
 	_cerr.open(L"~info.log",std::ios_base::beg|std::ios_base::out);
 	if (_cerr.is_open())
@@ -494,15 +549,20 @@ void wmain (int argc, wchar_t **argv)
 	if (argc<2)
 	{
 		// нет входных аргументов
-		wcerr<<L"Не указан путь к модели 3ds, повторите запуск указав путь к модели в качестве параметра"<<endl;
+		wcerr<<L"Не указан путь к модели 3ds, укажите путь к модели"<<endl;
+		_3dsFile=openFileNameW();
 		// выходим с ошибкой
-		exit(-1);
+		//exit(-1);
 	} else
 	{
 		// считаем что имя файла передано в качестве первого аргумента
 		_3dsFile=argv[1];
-		wcerr<<L"Загружается файл модели "<<_3dsFile<<endl;
 	}
+	while (!check3ds(_3dsFile))
+	{
+		_3dsFile=openFileNameW();
+	}
+	wcerr<<L"Загружается файл модели "<<_3dsFile<<endl;
 	// количество аргументов для инициализации GLUT
 	int _argc4GLUT=0;
 	// инициализация библиотеки GLUT
@@ -585,16 +645,28 @@ void wmain (int argc, wchar_t **argv)
 
 	// вывод строк описывающих OpenGL
 	// вывод производителя
-	printf("%s\n",glGetString(GL_VENDOR));
-	printf("%s\n",glGetString(GL_RENDERER));
-	printf("%s\n",glGetString(GL_VERSION));
+	std::cerr<<"=================================="<<std::endl;
+	std::cerr<<"Информация о производителе"<<std::endl;
+	std::cerr<<"Производитель: "<<glGetString(GL_VENDOR)<<std::endl;
+	std::cerr<<"Рендер: "<<glGetString(GL_RENDERER)<<std::endl;
+	std::cerr<<"Версия OGL: "<<glGetString(GL_VERSION)<<std::endl;
 	// вывод версии шейдерного языка
-	printf("%s\n",glGetString(GL_SHADING_LANGUAGE_VERSION));
+	std::cerr<<"Версия GLSL: "<<glGetString(GL_SHADING_LANGUAGE_VERSION)<<std::endl;
 	// вывод всех доступных расширений
 	char *ext=(char*)glGetString(GL_EXTENSIONS);
 	int i=0;
+	std::cerr<<"=================================="<<std::endl;
+	std::cerr<<"Информация о поддерживаемых расширениях"<<std::endl;
 	while (ext[i]!=0)
-		printf("%c",ext[i++]==' '?'\n':ext[i-1]);
+	{
+		if (ext[i++]==' ')
+		{
+			std::cerr<<std::endl;
+		} else
+		{
+			std::cerr<<ext[i-1];
+		}
+	}
 	
 	// основной цикл обработки сообщений ОС
 	glutMainLoop();

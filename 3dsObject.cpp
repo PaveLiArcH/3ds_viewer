@@ -9,6 +9,37 @@ namespace ns_3ds
 		cf_verticesCount=0;
 		cf_indexList=NULL;
 		cf_indexCount=0;
+		cf_texList=NULL;
+		cf_texCount=0;
+	}
+
+	c3dsObject::~c3dsObject()
+	{
+		if (cf_verticesList)
+		{
+			delete []cf_verticesList;
+		}
+		if (cf_indexList)
+		{
+			delete []cf_indexList;
+		}
+		if (cf_texList)
+		{
+			delete []cf_texList;
+		}
+		if (cf_faceMaterial.size()>0)
+		{
+			stdext::hash_map<std::string, std::vector<tChunkID> *>::iterator _it;
+			_it=cf_faceMaterial.begin();
+			for (; _it!=cf_faceMaterial.end(); _it++)
+			{
+				if (_it->second)
+				{
+					_it->second->clear();
+					delete (_it->second);
+				}
+			}
+		}
 	}
 
 	void c3dsObject::SetName(std::string a_name)

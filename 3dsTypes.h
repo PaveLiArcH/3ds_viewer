@@ -2,6 +2,7 @@
 #define __3dsTypes_h__
 
 #include <iostream>
+#include <string>
 #include "GLee.h"
 
 namespace ns_3ds
@@ -18,6 +19,9 @@ namespace ns_3ds
 	typedef tFloat tVec4[4];
 	typedef std::ostream tostream;
 	typedef std::istream tistream;
+
+	std::string wstringToString(std::wstring a_string);
+	std::wstring stringToWstring(std::wstring a_string);
 }
 
 #endif

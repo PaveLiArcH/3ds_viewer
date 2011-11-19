@@ -457,6 +457,7 @@ namespace ns_3ds
 		_maxoff=_maxoff+(a_header.len-6);
 		tVec _color=cm_chunkReaderColor(a_istream, _maxoff);
 		a_material->SetAmbient(_color);
+		delete []_color;
 		return true;
 	}
 
@@ -467,6 +468,7 @@ namespace ns_3ds
 		_maxoff=_maxoff+(a_header.len-6);
 		tVec _color=cm_chunkReaderColor(a_istream, _maxoff);
 		a_material->SetDiffuse(_color);
+		delete []_color;
 		return true;
 	}
 
@@ -477,6 +479,7 @@ namespace ns_3ds
 		_maxoff=_maxoff+(a_header.len-6);
 		tVec _color=cm_chunkReaderColor(a_istream, _maxoff);
 		a_material->SetSpecular(_color);
+		delete []_color;
 		return true;
 	}
 

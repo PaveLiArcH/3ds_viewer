@@ -39,6 +39,7 @@ namespace ns_3ds
 
 	public:
 		c3dsObject();
+		~c3dsObject();
 		void SetName(std::string a_name);
 		void SetHidden(bool a_hidden);
 		void SetNotShadowing(bool a_notShadowing);

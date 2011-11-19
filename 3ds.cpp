@@ -108,18 +108,29 @@ namespace ns_3ds
 			delete [] indexVertexNormal[i];
 			delete [] localMatrix[i];
 		}*/
-		hash_map<string, c3dsMaterial *>::iterator _it;
-		_it=cf_material.begin();
-		for (; _it!=cf_material.end(); _it++)
+		if (cf_material.size()>0)
 		{
-			delete (_it->second);
+			hash_map<string, c3dsMaterial *>::iterator _it;
+			_it=cf_material.begin();
+			for (; _it!=cf_material.end(); _it++)
+			{
+				delete (_it->second);
+			}
+			cf_material.clear();
+		}
+		if (cf_object.size()>0)
+		{
+			for (std::size_t i=0; i<cf_object.size(); i++)
+			{
+				delete (cf_object[i]);
+			}
+			cf_object.clear();
 		}
 		//cf_name.clear();
 		/*indexCount.clear();
 		indexVertexNormal.clear();
 		localMatrix.clear();
 		vertexVBO.clear();*/
-		cf_material.clear();
 	}
 
 	void c3ds::render(int filterMode)
@@ -229,6 +240,7 @@ namespace ns_3ds
 
 	bool c3ds::load(wstring fname)
 	{
+		bool _retVal=false;
 																					//// идентификатор чанка
 	//unsigned short chunkId;
 	//// позиция чанка в файле
@@ -249,18 +261,23 @@ namespace ns_3ds
 	//bool lastFailed;
 	//// одна единица измерения
 	//GLfloat oneUnit=1.0f;
-
+		std::cerr<<"=================================="<<std::endl;
+		string _ansiName=wstringToString(fname);
+		std::cerr<<"Начало чтения файла модели "<<_ansiName<<std::endl;
 		ifstream ifs;
 		ifs.open(fname.c_str(),ios_base::in|ios_base::binary|ios_base::beg);
 		if(!ifs.is_open())
 		{
-			return false; // error while opening file
+			std::cerr<<"Возникли ошибки при попытке чтения файла "<<_ansiName<<std::endl;
+			// error while opening file
 		}
 		else
 		{
 			// чтение идентификатора чанка
-			return ns_3ds::c3dsLoader::load(ifs, *this);
+			_retVal=ns_3ds::c3dsLoader::load(ifs, *this);
 		}
+		std::cerr<<"Завершение чтения файла модели "<<_ansiName<<std::endl;
+		return _retVal;
 			//ifs.read((char*)&chunkId,2);
 			//// чтение длины чанка
 			//ifs.read((char*)&chunkLen,4);

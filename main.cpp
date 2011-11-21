@@ -20,9 +20,12 @@
 #include "texture.h"
 
 #include "3dsMaterial.h"
+#include "3dsVertex.h"
 
 using namespace glm;
 using namespace std;
+using ns_3ds::sVertex;
+using ns_3ds::sVertexColor;
 
 std::ofstream _cerr;
 
@@ -32,26 +35,26 @@ std::wstring _3dsFile;
 int frame=0,time,timebase=0,w,h,delayPerFrames=20,filterMode=0,g_nMaxAnisotropy;
 char s[20];
 bool isDrawingFps=false, isDrawingBack=false;
-vertex surface[]={
-	vertex(-1.5*surfaceSpace,0,-1.5*surfaceSpace),
-	vertex(-1.5*surfaceSpace,0,-0.5*surfaceSpace),
-	vertex(-1.5*surfaceSpace,0,0.5*surfaceSpace),
-	vertex(-1.5*surfaceSpace,0,1.5*surfaceSpace),
+sVertex surface[]={
+	sVertex(-1.5*surfaceSpace,0,-1.5*surfaceSpace),
+	sVertex(-1.5*surfaceSpace,0,-0.5*surfaceSpace),
+	sVertex(-1.5*surfaceSpace,0,0.5*surfaceSpace),
+	sVertex(-1.5*surfaceSpace,0,1.5*surfaceSpace),
 
-	vertex(-0.5*surfaceSpace,0,-1.5*surfaceSpace),
-	vertex(-0.5*surfaceSpace,0,-0.5*surfaceSpace),
-	vertex(-0.5*surfaceSpace,0,0.5*surfaceSpace),
-	vertex(-0.5*surfaceSpace,0,1.5*surfaceSpace),
+	sVertex(-0.5*surfaceSpace,0,-1.5*surfaceSpace),
+	sVertex(-0.5*surfaceSpace,0,-0.5*surfaceSpace),
+	sVertex(-0.5*surfaceSpace,0,0.5*surfaceSpace),
+	sVertex(-0.5*surfaceSpace,0,1.5*surfaceSpace),
 
-	vertex(0.5*surfaceSpace,0,-1.5*surfaceSpace),
-	vertex(0.5*surfaceSpace,0,-0.5*surfaceSpace),
-	vertex(0.5*surfaceSpace,0,0.5*surfaceSpace),
-	vertex(0.5*surfaceSpace,0,1.5*surfaceSpace),
+	sVertex(0.5*surfaceSpace,0,-1.5*surfaceSpace),
+	sVertex(0.5*surfaceSpace,0,-0.5*surfaceSpace),
+	sVertex(0.5*surfaceSpace,0,0.5*surfaceSpace),
+	sVertex(0.5*surfaceSpace,0,1.5*surfaceSpace),
 
-	vertex(1.5*surfaceSpace,0,-1.5*surfaceSpace),
-	vertex(1.5*surfaceSpace,0,-0.5*surfaceSpace),
-	vertex(1.5*surfaceSpace,0,0.5*surfaceSpace),
-	vertex(1.5*surfaceSpace,0,1.5*surfaceSpace),
+	sVertex(1.5*surfaceSpace,0,-1.5*surfaceSpace),
+	sVertex(1.5*surfaceSpace,0,-0.5*surfaceSpace),
+	sVertex(1.5*surfaceSpace,0,0.5*surfaceSpace),
+	sVertex(1.5*surfaceSpace,0,1.5*surfaceSpace),
 };
 GLfloat surfaceTexCoord[]={
 	0.0,0.0,
@@ -95,28 +98,28 @@ GLuint surfaceIndex[]={
 	10,15,14,
 };
 GLfloat *surfaceIndexPoint,*surfaceNormal;
-vertex axes[]={
+sVertexColor axes[]={
 	// красна€ ось Ox
-	vertex(-surfaceSpace/2,0.1,0.0,1.0,0.0,0.0),
-	vertex(surfaceSpace,0.1, 0.0, 1.0,0.0,0.0),
+	sVertexColor(-surfaceSpace/2,0.1,0.0,1.0,0.0,0.0),
+	sVertexColor(surfaceSpace,0.1, 0.0, 1.0,0.0,0.0),
 	// зелена€ ось Oz
-	vertex(0.0,0.1,-surfaceSpace/2,0.0,1.0,0.0),
-	vertex(0.0,0.1,surfaceSpace,0.0,1.0,0.0),
+	sVertexColor(0.0,0.1,-surfaceSpace/2,0.0,1.0,0.0),
+	sVertexColor(0.0,0.1,surfaceSpace,0.0,1.0,0.0),
 	// син€€ ось Oy
-	vertex(0.0,-surfaceSpace/2,0.0,0.0,0.0,1.0),
-	vertex(0.0,surfaceSpace,0.0,0.0,0.0,1.0),
+	sVertexColor(0.0,-surfaceSpace/2,0.0,0.0,0.0,1.0),
+	sVertexColor(0.0,surfaceSpace,0.0,0.0,0.0,1.0),
 };
 
-vertex block[]={
-	vertex(-halfWi, -halfWi, +halfWi),
-	vertex(-halfWi, +halfWi, +halfWi),
-	vertex(-halfWi, +halfWi, -halfWi),
-	vertex(-halfWi, -halfWi, -halfWi),
+sVertex block[]={
+	sVertex(-halfWi, -halfWi, +halfWi),
+	sVertex(-halfWi, +halfWi, +halfWi),
+	sVertex(-halfWi, +halfWi, -halfWi),
+	sVertex(-halfWi, -halfWi, -halfWi),
 	
-	vertex(+halfWi, -halfWi, +halfWi),
-	vertex(+halfWi, +halfWi, +halfWi),
-	vertex(+halfWi, +halfWi, -halfWi),
-	vertex(+halfWi, -halfWi, -halfWi),
+	sVertex(+halfWi, -halfWi, +halfWi),
+	sVertex(+halfWi, +halfWi, +halfWi),
+	sVertex(+halfWi, +halfWi, -halfWi),
+	sVertex(+halfWi, -halfWi, -halfWi),
 };
 GLuint blockIndexes[]={
 	0, 4, 5, 1,
@@ -184,7 +187,7 @@ ns_3ds::c3dsMaterial planeMaterial=ns_3ds::c3dsMaterial(ambMat,difMat,speMat,0,6
 lightSource firstLight=lightSource(ambLig1,difLig1,speLig1,posLig1,dirLig1);
 lightSource secondLight=lightSource(ambLig2,difLig2,speLig2,posLig2,dirLig2);
 
-void addBlock(vertex center, vector<vertex> &v)
+void addBlock(sVertex center, vector<sVertex> &v)
 {
 	v.push_back(center);
 }
@@ -262,8 +265,8 @@ void display (void)
 	glLineWidth(0.5);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
-	glColorPointer(3,GL_FLOAT,sizeof(vertex),&axes[0].color);
-	glVertexPointer(3,GL_FLOAT,sizeof(vertex),&axes[0].coordinate);
+	glColorPointer(3,GL_FLOAT,sizeof(sVertexColor),&axes[0].sf_color);
+	glVertexPointer(3,GL_FLOAT,sizeof(sVertexColor),&axes[0].sf_coordinate);
 	glDrawArrays(GL_LINES,0,3*2);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -305,7 +308,7 @@ void display (void)
 	surfaceTex.bind();
 
 	glTexCoordPointer(2,GL_FLOAT,0,surfaceTexCoord);
-	glVertexPointer(3,GL_FLOAT,sizeof(vertex),&surface[0].coordinate);
+	glVertexPointer(3,GL_FLOAT,sizeof(sVertex),&surface[0].sf_coordinate);
 	glDrawElements(GL_TRIANGLES,18*3,GL_UNSIGNED_INT,surfaceIndex);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);

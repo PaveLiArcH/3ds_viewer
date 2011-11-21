@@ -114,4 +114,16 @@ namespace ns_3ds
 		//ToDo: сделать проверку на уже заданные текстурные координаты вертексов
 		cf_texCount=a_texCount;
 	}
+
+	bool c3dsObject::cm_Buffer(c3ds *a_3ds)
+	{
+		bool _retVal=false;
+		return _retVal;
+	}
+
+	bool c3dsObject::cm_Render(c3ds *a_3ds)
+	{
+		bool _retVal=false;
+		return _retVal;
+	}
 }

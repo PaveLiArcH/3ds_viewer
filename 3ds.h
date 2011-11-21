@@ -17,6 +17,7 @@
 #include "texture.h"
 #include "3dsTypes.h"
 #include "3dsLoader.h"
+#include "3dsVertex.h"
 
 using namespace std;
 using namespace glm;
@@ -65,7 +66,7 @@ namespace ns_3ds
 		// конструктор по умолчанию
 		c3ds();
 		// конструктор по заданной позиции
-		c3ds(vertex &pos);
+		c3ds(sVertex &pos);
 		// деструктор
 		~c3ds();
 		// загрузка файла 3ds и запись в буферы VBO
@@ -75,7 +76,7 @@ namespace ns_3ds
 		// буферизация в VBO
 		void buffer();
 		// установка масштаба
-		void setScale(GLfloat scale);
+		void setScale(tFloat scale);
 		//// установка положения объекта
 		//void setPosition(vertex &pos)
 		//{

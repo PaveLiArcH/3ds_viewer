@@ -8,6 +8,8 @@
 
 namespace ns_3ds
 {
+	class c3ds;
+
 	class c3dsObject
 	{
 		// название объекта
@@ -53,7 +55,12 @@ namespace ns_3ds
 		void SetFaceMaterial(std::string a_materialName, std::vector<tChunkID> *a_faces);
 		void SetTexList(tFloat *a_texList);
 		void SetTexCount(tChunkID a_texCount);
+
+		bool cm_Buffer(c3ds *a_3ds);
+		bool cm_Render(c3ds *a_3ds);
 	};
 }
+
+#include "3ds.h"
 
 #endif

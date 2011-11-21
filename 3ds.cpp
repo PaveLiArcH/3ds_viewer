@@ -87,7 +87,7 @@ namespace ns_3ds
 	}
 
 	// конструктор по заданной позиции
-	c3ds::c3ds(vertex &pos):/*directionMatrix(NULL),*/tex(NULL)
+	c3ds::c3ds(sVertex &pos):/*directionMatrix(NULL),*/tex(NULL)
 	{
 		//position=pos;
 		init();

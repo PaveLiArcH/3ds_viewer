@@ -5,6 +5,7 @@
 #include "3dsTypes.h"
 #include <hash_map>
 #include <vector>
+#include "3dsVertex.h"
 
 namespace ns_3ds
 {
@@ -38,7 +39,10 @@ namespace ns_3ds
 		tFloat *cf_texList;
 		// число вертексов
 		tChunkID cf_texCount;
-
+		// буфер VBO
+		tUint cf_vertexVBO;
+		// буферизованные данные
+		sVertexNormalTex *cf_vertexBuffer;
 	public:
 		c3dsObject();
 		~c3dsObject();

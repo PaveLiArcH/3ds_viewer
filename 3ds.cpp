@@ -21,6 +21,10 @@ namespace ns_3ds
 	// буферизация данных объекта в VBO
 	void c3ds::buffer()
 	{
+		for (std::size_t i=0; i<cf_object.size(); i++)
+		{
+			cf_object[i]->cm_Buffer(this);
+		}
 		//if (!hasVBO) { return; } // no VBO
 		//if (newOGL) // OGL>=1.5
 		//{
@@ -135,6 +139,10 @@ namespace ns_3ds
 
 	void c3ds::render(int filterMode)
 	{
+		for (std::size_t i=0; i<cf_object.size(); i++)
+		{
+			cf_object[i]->cm_Render(this);
+		}
 		//glPushMatrix(); // save current matrix
 		//// применение матрицы поворота
 		//glMultMatrixf(directionMatrix);

@@ -11,6 +11,8 @@ namespace ns_3ds
 		cf_indexCount=0;
 		cf_texList=NULL;
 		cf_texCount=0;
+		cf_vertexBuffer=NULL;
+		cf_vertexVBO=0;
 	}
 
 	c3dsObject::~c3dsObject()
@@ -118,12 +120,149 @@ namespace ns_3ds
 	bool c3dsObject::cm_Buffer(c3ds *a_3ds)
 	{
 		bool _retVal=false;
+		if (!cf_vertexBuffer)
+		{
+			cf_vertexBuffer=new sVertexNormalTex [3*cf_indexCount];
+			for(int i=0;i<cf_indexCount;i++) // read indexes
+			{
+				// чтение индексов и сохранение вершин
+				for (int j=0; j<3; j++)
+				{
+					int _num=3*i+j;
+					cf_vertexBuffer[_num].SetCoord(&cf_verticesList[3*cf_indexList[_num]]);
+					cf_vertexBuffer[_num].SetTex(&cf_texList[2*cf_indexList[_num]]);
+				}
+				// вычисление нормали
+				vec3 a0=cf_vertexBuffer[3*i].Vec3Coordinate();
+				vec3 a1=cf_vertexBuffer[3*i+1].Vec3Coordinate();
+				vec3 a2=cf_vertexBuffer[3*i+2].Vec3Coordinate();
+				vec3 a1a0=a0-a1,a1a2=a2-a1;
+				vec3 normal=normalize(cross(a1a2,a1a0));
+				// сохранение нормали для 3 точек полигона
+				cf_vertexBuffer[3*i].SetNormal(&normal.x);
+				cf_vertexBuffer[3*i+1].SetNormal(&normal.x);
+				cf_vertexBuffer[3*i+2].SetNormal(&normal.x);
+			}
+
+			if (!c3ds::hasVBO) { return false; } // no VBO
+			if (c3ds::newOGL) // OGL>=1.5
+			{
+				// генерация имени для буферного объекта
+				glGenBuffers(1, &cf_vertexVBO);
+				// привязка буфера
+				glBindBuffer(GL_ARRAY_BUFFER, cf_vertexVBO);
+				// создание и инициализация области хранения данных для буферного объекта
+				glBufferData(GL_ARRAY_BUFFER, cf_indexCount*3*sizeof(sVertexNormalTex), cf_vertexBuffer, GL_STATIC_DRAW);
+				// отключение буфера
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				_retVal=true;
+			}
+			else // old OGL
+			{
+				// генерация имени для буферного объекта
+				glGenBuffersARB(1, &cf_vertexVBO);
+				// привязка буфера
+				glBindBufferARB(GL_ARRAY_BUFFER_ARB, cf_vertexVBO);
+				// создание и инициализация области хранения данных для буферного объекта
+				glBufferDataARB(GL_ARRAY_BUFFER_ARB, cf_indexCount*3*sizeof(sVertexNormalTex), cf_vertexBuffer, GL_STATIC_DRAW);
+				// отключение буфера
+				glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+				_retVal=true;
+			}
+		}
 		return _retVal;
 	}
 
 	bool c3dsObject::cm_Render(c3ds *a_3ds)
 	{
 		bool _retVal=false;
+		glPushMatrix(); // save current matrix
+		//// применение матрицы поворота
+		//glMultMatrixf(directionMatrix);
+		//// установка цвета
+		//glColor3f(position.color[0],position.color[1],position.color[2]);
+		if (c3ds::hasVBO) // has VBO
+		{
+			if (c3ds::newOGL) // OGL>=1.5
+			{
+				// включение массива вершин
+				glEnableClientState(GL_VERTEX_ARRAY);
+				// включение массива нормалей
+				glEnableClientState(GL_NORMAL_ARRAY);
+				//glPushMatrix(); // save current matrix
+				//glMultMatrixf(localMatrix[i]);
+				// привязка буфера
+				glBindBuffer(GL_ARRAY_BUFFER, cf_vertexVBO);
+				// установка указателя на массив вершин по VBO
+				glVertexPointer(3, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_coordinate-(char *)cf_vertexBuffer));
+				// установка указателя на массив нормалей по VBO
+				glNormalPointer(GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_normal-(char *)cf_vertexBuffer));
+				glEnable(GL_TEXTURE_2D);
+				glClientActiveTexture(GL_TEXTURE0);
+				// включение массива текстурных координат
+				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				// привязка текстуры
+				//tex->bind();
+				// установка указателя на массив текстурных координат по VBO
+				//GLvoid * tmpK=(GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]);
+				glTexCoordPointer(2, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_tex-(char *)cf_vertexBuffer));
+				// отрисовка вершин
+				glDrawArrays(GL_TRIANGLES, 0, 3*cf_indexCount);
+				glDisable(GL_TEXTURE_2D);
+				// отключение массива текстурных координат
+				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+				// отключение массива вершин
+				glDisableClientState(GL_VERTEX_ARRAY);
+				// отключение массива нормалей
+				glDisableClientState(GL_NORMAL_ARRAY);
+				// отключение буфера
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				// отключение буфера
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+				_retVal=true;
+				//glPopMatrix(); // restore matrix
+			} else // old OGL
+			{
+				// включение массива вершин
+				glEnableClientState(GL_VERTEX_ARRAY);
+				// включение массива нормалей
+				glEnableClientState(GL_NORMAL_ARRAY);
+				//glPushMatrix(); // save current matrix
+				//glMultMatrixf(localMatrix[i]);
+				// привязка буфера
+				glBindBufferARB(GL_ARRAY_BUFFER_ARB, cf_vertexVBO);
+				// установка указателя на массив вершин по VBO
+				glVertexPointer(3, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_coordinate-(char *)cf_vertexBuffer));
+				// установка указателя на массив нормалей по VBO
+				glNormalPointer(GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_normal-(char *)cf_vertexBuffer));
+				// отрисовка вершин
+				glDrawArrays(GL_TRIANGLES, 0, 3*cf_indexCount);
+				// отключение массива вершин
+				glDisableClientState(GL_VERTEX_ARRAY);
+				// отключение массива нормалей
+				glDisableClientState(GL_NORMAL_ARRAY);
+				// отключение буфера
+				glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+				// отключение буфера
+				glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+				_retVal=true;
+				//glPopMatrix(); // restore matrix
+			}
+		} else // no VBO
+		{
+			//glPushMatrix(); // save current matrix
+			//glMultMatrixf(localMatrix[j]);
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glEnableClientState(GL_NORMAL_ARRAY);
+			glVertexPointer(3, GL_FLOAT, sizeof(sVertexNormalTex), cf_vertexBuffer[0].sf_coordinate);
+			glNormalPointer(GL_FLOAT, sizeof(sVertexNormalTex), cf_vertexBuffer[0].sf_normal);
+			glDrawArrays(GL_TRIANGLES, 0, 3*cf_indexCount);
+			glDisableClientState(GL_VERTEX_ARRAY);
+			glDisableClientState(GL_NORMAL_ARRAY);
+			_retVal=true;
+			//glPopMatrix(); // restore matrix
+		}
+		glPopMatrix(); // restore matrix
 		return _retVal;
 	}
 }

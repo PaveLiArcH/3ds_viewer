@@ -1,7 +1,6 @@
 #ifndef __texture_h__
 #define __texture_h__
 
-//#define _HAS_ITERATOR_DEBUGGING 0
 //Glee
 #include "glee.h"
 //VC++

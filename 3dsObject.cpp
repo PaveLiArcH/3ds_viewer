@@ -197,12 +197,20 @@ namespace ns_3ds
 				glVertexPointer(3, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_coordinate-(char *)cf_vertexBuffer));
 				// установка указателя на массив нормалей по VBO
 				glNormalPointer(GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_normal-(char *)cf_vertexBuffer));
-				glEnable(GL_TEXTURE_2D);
-				glClientActiveTexture(GL_TEXTURE0);
+				
 				// включение массива текстурных координат
 				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 				// привязка текстуры
 				//tex->bind();
+				if (cf_faceMaterial.size()>0)
+				{
+					std::string _materialName=cf_faceMaterial.begin()->first;
+					c3dsMaterial *_material=a_3ds->cf_material.at(_materialName);
+					if (_material)
+					{
+						_material->cm_Use();
+					}
+				}
 				// установка указателя на массив текстурных координат по VBO
 				//GLvoid * tmpK=(GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]);
 				glTexCoordPointer(2, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_tex-(char *)cf_vertexBuffer));

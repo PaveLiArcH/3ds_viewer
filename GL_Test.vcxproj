@@ -88,11 +88,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="3ds.cpp" />
     <ClCompile Include="shader.cpp" />
-    <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3dsHeader.h" />
     <ClInclude Include="3dsLoader.h" />
+    <ClInclude Include="3dsMap.h" />
     <ClInclude Include="3dsMaterial.h" />
     <ClInclude Include="3dsObject.h" />
     <ClInclude Include="3dsTextureDevIL.h" />
@@ -109,7 +109,6 @@
     <ClInclude Include="3ds.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="texture.h" />
     <ClInclude Include="vertex.h" />
     <ClInclude Include="vkscancodes.h" />
   </ItemGroup>

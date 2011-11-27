@@ -432,6 +432,8 @@ namespace ns_3ds
 			return &cm_chunkReaderMaterialTransparencyFalloff;
 		case(chunks::REFLECTIONBLURPERCENT):
 			return &cm_chunkReaderMaterialReflectionBlur;
+		case(chunks::TEXTUREMAP1):
+			return &cm_chunkReaderMaterialTextureMap1;
 		default:
 			return &cm_chunkReaderMaterialUnknown;
 		}
@@ -530,6 +532,19 @@ namespace ns_3ds
 		_maxoff=_maxoff+(a_header.len-6);
 		tFloat _percent=cm_chunkReaderPercent(a_istream, _maxoff);
 		a_material->SetReflectionBlurPercent(_percent);
+		return true;
+	}
+	
+	bool c3dsLoader::cm_chunkReaderMaterialTextureMap1 (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material)
+	{
+		std::cerr<<"Найден чанк текстурной карты материала "<<std::hex<<a_header.id<<std::endl;
+		std::streamoff _maxoff=a_istream.tellg();
+		_maxoff=_maxoff+(a_header.len-6);
+		c3dsMap *_map=cm_chunkReaderMap(a_istream, _maxoff);
+		c3dsTextureDevIL *_texture=new c3dsTextureDevIL();
+		_texture->load(_map);
+		delete _map;
+		a_material->SetTextureMap(_texture);
 		return true;
 	}
 
@@ -708,4 +723,57 @@ namespace ns_3ds
 		return _res;
 	}
 	#pragma endregion Процентные чанки
+
+	#pragma region MapChunks
+	c3dsMap * c3dsLoader::cm_chunkReaderMap (tistream & a_istream, std::streamoff & a_maxoffset)
+	{
+		s3dsHeader _header;
+		bool _res;
+		c3dsMap *_retMap=new c3dsMap();
+		while ((a_istream.tellg()<a_maxoffset)&&!(a_istream.fail()||a_istream.eof()||((a_istream>>_header).eof())))
+		{
+			ptChunkReaderMap _chunkReaderMap=cm_getChunkReaderMap(_header);
+			_res=(*_chunkReaderMap)(a_istream, _header, _retMap);
+		}
+		return _retMap;
+	}
+
+	ptChunkReaderMap c3dsLoader::cm_getChunkReaderMap(s3dsHeader & a_header)
+	{
+		switch (a_header.id)
+		{
+		case (chunks::MAPFILENAME):
+			return &cm_chunkReaderMapFile;
+		default:
+			return &cm_chunkReaderMapUnknown;
+		}
+	}
+
+	bool c3dsLoader::cm_chunkReaderMapFile (tistream & a_istream, s3dsHeader & a_header, c3dsMap *a_map)
+	{
+		std::cerr<<"Найден map чанк имени файла "<<std::hex<<a_header.id<<std::endl;
+		char _c;
+		string _temp;
+		while (a_istream.read(&_c,1)&&(!a_istream.eof())&&_c)
+		{
+			_temp+=_c;
+		}
+		a_map->SetMapFile(_temp);
+		return true;
+	}
+
+	bool c3dsLoader::cm_chunkReaderMapUnknown (tistream & a_istream, s3dsHeader & a_header, c3dsMap *a_map)
+	{
+		std::cerr<<"Найден неизвестный чанк "<<std::hex<<a_header.id<<" в блоке map чанков"<<std::endl;
+		tFloat _res=0.0f;
+		if (a_header.len<6)
+		{
+			std::cerr<<"\tНекорректная длина чанка"<<std::endl;
+			// TODO throw an exception
+			return false;
+		}
+		a_istream.seekg(a_header.len-6, std::ios::cur);
+		return _res;
+	}
+	#pragma endregion Map чанки
 }

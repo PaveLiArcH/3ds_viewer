@@ -8,6 +8,7 @@ namespace ns_3ds
 	struct s3dsHeader;
 	class c3ds;
 	class c3dsMaterial;
+	class c3dsMap;
 
 	typedef bool (*ptChunkReader) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 	typedef tVec (*ptChunkReaderColor) (tistream & a_istream, s3dsHeader & a_header);
@@ -16,6 +17,7 @@ namespace ns_3ds
 	typedef bool (*ptChunkReaderObject) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 	typedef bool (*ptChunkReaderObjectTrimesh) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 	typedef bool (*ptChunkReaderObjectTrimeshFace) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
+	typedef bool (*ptChunkReaderMap) (tistream & a_istream, s3dsHeader & a_header, c3dsMap *a_map);
 	class c3dsLoader
 	{
 		static ptChunkReader cm_getChunkReader(s3dsHeader & a_header);
@@ -70,6 +72,7 @@ namespace ns_3ds
 		static bool cm_chunkReaderMaterialTransparency (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
 		static bool cm_chunkReaderMaterialTransparencyFalloff (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
 		static bool cm_chunkReaderMaterialReflectionBlur (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
+		static bool cm_chunkReaderMaterialTextureMap1 (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
 		static bool cm_chunkReaderMaterialUnknown (tistream & a_istream, s3dsHeader & a_header, c3dsMaterial * a_material);
 		#pragma endregion Материальные чанки
 
@@ -91,12 +94,20 @@ namespace ns_3ds
 		static tFloat cm_chunkReaderPercentUnknown (tistream & a_istream, s3dsHeader & a_header);
 		#pragma endregion Процентные чанки
 
+		#pragma region MapChunks
+		static ptChunkReaderMap cm_getChunkReaderMap(s3dsHeader & a_header);
+		static c3dsMap *cm_chunkReaderMap (tistream & a_istream, std::streamoff & a_maxoffset);
+		static bool cm_chunkReaderMapFile (tistream & a_istream, s3dsHeader & a_header, c3dsMap *a_map);
+		static bool cm_chunkReaderMapUnknown (tistream & a_istream, s3dsHeader & a_header, c3dsMap *a_map);
+		#pragma endregion Map чанки
+
 	public:
 		static bool load (tistream & a_istream, c3ds & a_object);
 	};
 }
 
 #include "3dsHeader.h"
+#include "3dsMap.h"
 #include "3ds.h"
 
 #endif

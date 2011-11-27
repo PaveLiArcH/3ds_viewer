@@ -2,16 +2,16 @@
 
 namespace ns_3ds
 {
-	tUint c3dsTetureDevIL::mode=0;
-	GLint c3dsTetureDevIL::g_nMaxAnisotropy=0;
+	tUint c3dsTextureDevIL::mode=0;
+	GLint c3dsTextureDevIL::g_nMaxAnisotropy=0;
 
-	void c3dsTetureDevIL::changeMode()
+	void c3dsTextureDevIL::changeMode()
 	{
 		mode+=1;
 		mode%=4;
 	}
 
-	void c3dsTetureDevIL::useMode(bool mipMap)
+	void c3dsTextureDevIL::useMode(bool mipMap)
 	{
 		if (mipMap)
 		{
@@ -57,7 +57,7 @@ namespace ns_3ds
 		}
 	}
 
-	c3dsTetureDevIL::~c3dsTetureDevIL()
+	c3dsTextureDevIL::~c3dsTextureDevIL()
 	{
 		if (loaded)
 		{
@@ -67,7 +67,7 @@ namespace ns_3ds
 		}
 	}
 
-	bool c3dsTetureDevIL::bind()
+	bool c3dsTextureDevIL::bind()
 	{
 		if (loaded)
 		{
@@ -79,10 +79,10 @@ namespace ns_3ds
 		return false;
 	}
 
-	bool c3dsTetureDevIL::load(std::wstring file, bool useMipMap, bool repeatS, bool repeatT)
+	bool c3dsTextureDevIL::load(std::wstring file, bool useMipMap, bool repeatS, bool repeatT)
 	{
 		mipMap=useMipMap;
-		this->~c3dsTetureDevIL();
+		this->~c3dsTextureDevIL();
 		ILuint devilError;
 		GLenum openglError;
 		devilError=ilGetError();
@@ -118,7 +118,53 @@ namespace ns_3ds
 		loaded=true;
 		return true;
 	}
-	void c3dsTetureDevIL::allowMimMap(bool allow)
+
+	bool c3dsTextureDevIL::load(c3dsMap *a_map, bool useMipMap, bool repeatS, bool repeatT)
+	{
+		loaded=false;
+		if (a_map)
+		{
+			mipMap=useMipMap;
+			this->~c3dsTextureDevIL();
+			ILuint devilError;
+			GLenum openglError;
+			devilError=ilGetError();
+			openglError=glGetError();
+			ilGenImages(1,&devilID);
+			ilBindImage(devilID);
+			std::wstring _filename=stringToWstring(a_map->GetMapFile());
+			ilLoadImage(_filename.c_str()); // load into the current bound image
+			devilError=ilGetError();
+			if(devilError!=IL_NO_ERROR)
+			{
+				wprintf(L"Devil Error (ilLoadImage): %s\nError while processing file: %s\n",iluErrorString(devilError),_filename.c_str());
+				return false;
+			}
+			openglID=(mipMap)?ilutGLBindMipmaps():ilutGLBindTexImage(); // generate the GL texture
+			devilError=ilGetError();
+			openglError=glGetError();
+			if(devilError!=IL_NO_ERROR)
+			{
+				wprintf(L"Devil Error (ilLoadImage): %s\nError while processing file: %s\n",iluErrorString(devilError),_filename.c_str());
+				return false;
+			}
+			if(openglError!=GL_NO_ERROR)
+			{
+				printf("Opengl Error (ilutGLBindTexImage): %s\n", gluErrorString(openglError));
+				return false;
+			}
+			GLint currTexId=0;
+			glGetIntegerv(GL_TEXTURE_BINDING_2D,&currTexId);
+			glBindTexture(GL_TEXTURE_2D,openglID);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,(repeatS)?GL_REPEAT:GL_CLAMP);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,(repeatT)?GL_REPEAT:GL_CLAMP);
+			glBindTexture(GL_TEXTURE_2D,currTexId);
+			loaded=true;
+		}
+		return loaded;
+	}
+
+	void c3dsTextureDevIL::allowMimMap(bool allow)
 	{
 		if (loaded)
 		{
@@ -130,7 +176,7 @@ namespace ns_3ds
 			glBindTexture(GL_TEXTURE_2D,currTexId);
 		}
 	}
-	tUint c3dsTetureDevIL::getTextureId()
+	tUint c3dsTextureDevIL::getTextureId()
 	{
 		return (loaded)?openglID:0;
 	}

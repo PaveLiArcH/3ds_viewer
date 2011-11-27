@@ -17,10 +17,10 @@
 #include "vertex.h"
 #include "3ds.h"
 #include "shader.h"
-#include "texture.h"
 
 #include "3dsMaterial.h"
 #include "3dsVertex.h"
+#include "3dsTextureDevIL.h"
 
 using namespace glm;
 using namespace std;
@@ -176,7 +176,7 @@ GLfloat dirLig2[3]={
 	0.0f,0.0f,-1.0f
 };
 ILuint devilError;
-texture surfaceTex;
+ns_3ds::c3dsTextureDevIL surfaceTex;
 
 ns_3ds::c3ds *object;
 bool newOGL=false,hasVBO=false,hasFragmentShader=false,hasVertexShader=false;
@@ -402,7 +402,7 @@ void processNormalKeys(unsigned char key, int x, int y)
 		}
 		case VK_T:
 		{
-			texture::changeMode();
+			ns_3ds::c3dsTextureDevIL::changeMode();
 		}
 	}
 	switch(key)

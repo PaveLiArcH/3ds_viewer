@@ -27,9 +27,6 @@
     <ClCompile Include="shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GLee.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -69,9 +66,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vertex.h">
@@ -120,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="3dsTextureDevIL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="3dsMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

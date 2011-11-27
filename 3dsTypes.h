@@ -21,7 +21,7 @@ namespace ns_3ds
 	typedef std::istream tistream;
 
 	std::string wstringToString(std::wstring a_string);
-	std::wstring stringToWstring(std::wstring a_string);
+	std::wstring stringToWstring(std::string a_string);
 }
 
 #endif

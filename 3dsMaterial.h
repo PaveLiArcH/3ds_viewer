@@ -6,6 +6,8 @@
 
 namespace ns_3ds
 {
+	class c3dsTextureDevIL;
+
 	class c3dsMaterial
 	{
 		std::string cf_materialName;
@@ -19,6 +21,7 @@ namespace ns_3ds
 		tFloat cf_transparencyPercent;
 		tFloat cf_transparencyFalloffPercent;
 		tFloat cf_reflectionBlurPercent;
+		c3dsTextureDevIL *cf_textureMap;
 	public:
 		// конструктор по умолчанию
 		c3dsMaterial();
@@ -46,9 +49,13 @@ namespace ns_3ds
 		void SetTransparencyFalloffPercent(tFloat a_transparency);
 		// установка размытости отражения
 		void SetReflectionBlurPercent(tFloat a_reflectionBlur);
+		// установка текстуры
+		void SetTextureMap(c3dsTextureDevIL *a_textureMap);
 		// использование материала для граней face
 		bool cm_Use(tEnum a_face=GL_FRONT_AND_BACK);
 	};
 }
+
+#include "3dsTextureDevIL.h"
 
 #endif

@@ -18,6 +18,7 @@ namespace ns_3ds
 		cf_shininessStrengthPercent=0.0f;
 		cf_transparencyPercent=0.0f;
 		cf_transparencyFalloffPercent=0.0f;
+		cf_textureMap=NULL;
 	}
 	c3dsMaterial::c3dsMaterial(GLfloat *amb, GLfloat *diff, GLfloat *spec, GLfloat *emiss, GLfloat shin)
 	{
@@ -35,6 +36,7 @@ namespace ns_3ds
 		cf_shininessStrengthPercent=sqrtf(shin)*sqrtf(10000.0f);
 		cf_transparencyPercent=0.0f;
 		cf_transparencyFalloffPercent=0.0f;
+		cf_textureMap=NULL;
 	}
 
 	void c3dsMaterial::SetMaterialName(std::string a_name)
@@ -121,6 +123,12 @@ namespace ns_3ds
 		cf_reflectionBlurPercent=((a_reflectionBlur>=0.0f)&&(a_reflectionBlur<=100.0f))?a_reflectionBlur:0.0f;
 	}
 
+	void c3dsMaterial::SetTextureMap(c3dsTextureDevIL *a_textureMap)
+	{
+		// ToDo: добавить проверку на инициализированность текстуры
+		cf_textureMap=a_textureMap;
+	}
+
 	bool c3dsMaterial::cm_Use(tEnum a_face)
 	{
 		// контроль переданных данных
@@ -133,6 +141,12 @@ namespace ns_3ds
 			glMaterialfv(a_face,GL_EMISSION,cf_emission);
 			tFloat _shininess=((cf_shininessPercent*cf_shininessStrengthPercent)/10000.0f)*128.0f;
 			glMaterialfv(a_face,GL_SHININESS,&_shininess);
+			if (cf_textureMap)
+			{
+				glEnable(GL_TEXTURE_2D);
+				glClientActiveTexture(GL_TEXTURE0);
+				cf_textureMap->bind();
+			}
 			return true;
 		}
 		return false;

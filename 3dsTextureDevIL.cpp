@@ -79,7 +79,7 @@ namespace ns_3ds
 		return false;
 	}
 
-	bool c3dsTextureDevIL::load(std::wstring file, bool useMipMap, bool repeatS, bool repeatT)
+	bool c3dsTextureDevIL::load(std::wstring a_file, std::wstring a_resourceDir, bool useMipMap, bool repeatS, bool repeatT)
 	{
 		mipMap=useMipMap;
 		this->~c3dsTextureDevIL();
@@ -89,19 +89,26 @@ namespace ns_3ds
 		openglError=glGetError();
 		ilGenImages(1,&devilID);
 		ilBindImage(devilID);
-		ilLoadImage(file.c_str()); // load into the current bound image
+		std::wstring _path=a_resourceDir+a_file;
+		ilLoadImage(_path.c_str()); // load into the current bound image
 		devilError=ilGetError();
 		if(devilError!=IL_NO_ERROR)
 		{
-			wprintf(L"Devil Error (ilLoadImage): %s\nError while processing file: %s\n",iluErrorString(devilError),file.c_str());
-			return false;
+			std::wstring _path=a_file;
+			ilLoadImage(_path.c_str()); // load into the current bound image
+			devilError=ilGetError();
+			if(devilError!=IL_NO_ERROR)
+			{
+				wprintf(L"Devil Error (ilLoadImage): %s\nError while processing file: %s\n",iluErrorString(devilError),_path.c_str());
+				return false;
+			}
 		}
 		openglID=(mipMap)?ilutGLBindMipmaps():ilutGLBindTexImage(); // generate the GL texture
 		devilError=ilGetError();
 		openglError=glGetError();
 		if(devilError!=IL_NO_ERROR)
 		{
-			wprintf(L"Devil Error (ilLoadImage): %s\nError while processing file: %s\n",iluErrorString(devilError),file.c_str());
+			wprintf(L"Devil Error (ilLoadImage): %s\nError while processing file: %s\n",iluErrorString(devilError),_path.c_str());
 			return false;
 		}
 		if(openglError!=GL_NO_ERROR)
@@ -119,47 +126,13 @@ namespace ns_3ds
 		return true;
 	}
 
-	bool c3dsTextureDevIL::load(c3dsMap *a_map, bool useMipMap, bool repeatS, bool repeatT)
+	bool c3dsTextureDevIL::load(c3dsMap *a_map, std::wstring a_resourceDir, bool useMipMap, bool repeatS, bool repeatT)
 	{
 		loaded=false;
 		if (a_map)
 		{
-			mipMap=useMipMap;
-			this->~c3dsTextureDevIL();
-			ILuint devilError;
-			GLenum openglError;
-			devilError=ilGetError();
-			openglError=glGetError();
-			ilGenImages(1,&devilID);
-			ilBindImage(devilID);
 			std::wstring _filename=stringToWstring(a_map->GetMapFile());
-			ilLoadImage(_filename.c_str()); // load into the current bound image
-			devilError=ilGetError();
-			if(devilError!=IL_NO_ERROR)
-			{
-				wprintf(L"Devil Error (ilLoadImage): %s\nError while processing file: %s\n",iluErrorString(devilError),_filename.c_str());
-				return false;
-			}
-			openglID=(mipMap)?ilutGLBindMipmaps():ilutGLBindTexImage(); // generate the GL texture
-			devilError=ilGetError();
-			openglError=glGetError();
-			if(devilError!=IL_NO_ERROR)
-			{
-				wprintf(L"Devil Error (ilLoadImage): %s\nError while processing file: %s\n",iluErrorString(devilError),_filename.c_str());
-				return false;
-			}
-			if(openglError!=GL_NO_ERROR)
-			{
-				printf("Opengl Error (ilutGLBindTexImage): %s\n", gluErrorString(openglError));
-				return false;
-			}
-			GLint currTexId=0;
-			glGetIntegerv(GL_TEXTURE_BINDING_2D,&currTexId);
-			glBindTexture(GL_TEXTURE_2D,openglID);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,(repeatS)?GL_REPEAT:GL_CLAMP);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,(repeatT)?GL_REPEAT:GL_CLAMP);
-			glBindTexture(GL_TEXTURE_2D,currTexId);
-			loaded=true;
+			loaded=load(_filename, a_resourceDir, useMipMap, repeatS, repeatT);
 		}
 		return loaded;
 	}

@@ -125,12 +125,19 @@ namespace ns_3ds
 			cf_vertexBuffer=new sVertexNormalTex [3*cf_indexCount];
 			for(int i=0;i<cf_indexCount;i++) // read indexes
 			{
+				tFloat _zeros[3]={0.0f, 0.0f, 0.0f};
 				// чтение индексов и сохранение вершин
 				for (int j=0; j<3; j++)
 				{
 					int _num=3*i+j;
 					cf_vertexBuffer[_num].SetCoord(&cf_verticesList[3*cf_indexList[_num]]);
-					cf_vertexBuffer[_num].SetTex(&cf_texList[2*cf_indexList[_num]]);
+					if (cf_texList)
+					{
+						cf_vertexBuffer[_num].SetTex(&cf_texList[2*cf_indexList[_num]]);
+					} else
+					{
+						cf_vertexBuffer[_num].SetTex(_zeros);
+					}
 				}
 				// вычисление нормали
 				vec3 a0=cf_vertexBuffer[3*i].Vec3Coordinate();

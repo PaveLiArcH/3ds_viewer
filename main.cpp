@@ -12,7 +12,6 @@
 #include "glut.h"
 //self implemented
 #include "stdafx.h"
-#include "camera.h"
 #include "vkscancodes.h"
 #include "vertex.h"
 #include "3ds.h"
@@ -34,7 +33,7 @@ std::wstring _3dsFile;
 
 int frame=0,time,timebase=0,w,h,delayPerFrames=20,filterMode=0,g_nMaxAnisotropy;
 char s[20];
-bool isDrawingFps=false, isDrawingBack=false;
+bool isDrawingFps=true, isDrawingBack=false;
 sVertex surface[]={
 	sVertex(-1.5*surfaceSpace,0,-1.5*surfaceSpace),
 	sVertex(-1.5*surfaceSpace,0,-0.5*surfaceSpace),
@@ -180,7 +179,6 @@ ns_3ds::c3dsTextureDevIL surfaceTex;
 
 ns_3ds::c3ds *object;
 bool newOGL=false,hasVBO=false,hasFragmentShader=false,hasVertexShader=false;
-camera *cam;
 
 shader modelShader,planeShader;
 ns_3ds::c3dsMaterial planeMaterial=ns_3ds::c3dsMaterial(ambMat,difMat,speMat,0,64.0f);
@@ -195,12 +193,17 @@ void addBlock(sVertex center, vector<sVertex> &v)
 // посимвольная отрисовка строки шрифтом font
 void renderBitmapString(float x, float y, void *font, char *string)
 {
-	char *c;
+	//glEnable(GL_COLOR_LOGIC_OP);
+	//glLogicOp(GL_XOR);
+	glEnable(GL_BLEND);
+	glBlendFuncSeparate(GL_ZERO, GL_ONE_MINUS_DST_COLOR, GL_ZERO, GL_DST_ALPHA);
 	glRasterPos2f(x, y);
-	for (c=string; *c != '\0'; c++)
+	for (char *c=string; *c!='\0'; c++)
 	{
 		glutBitmapCharacter(font, *c);
 	}
+	glDisable(GL_BLEND);
+	//glDisable(GL_COLOR_LOGIC_OP);
 }
 
 // переход к ортографической проекции
@@ -232,7 +235,7 @@ void drawFps()
 	frame++;
 	time=glutGet(GLUT_ELAPSED_TIME);
 	if (time - timebase > 1000) {
-		sprintf(s,"FPS:%4.2f",
+		sprintf(s,"FPS:%4.1f",
 			frame*1000.0/(time-timebase));
 		timebase = time;
 		frame = 0;
@@ -242,7 +245,7 @@ void drawFps()
 	glPushMatrix();
 	glLoadIdentity();
 	setOrthographicProjection();
-	renderBitmapString(20,35,GLUT_BITMAP_TIMES_ROMAN_24,s);
+	renderBitmapString(20,20,GLUT_BITMAP_9_BY_15,s);
 	glPopMatrix();
 	resetPerspectiveProjection();
 }
@@ -281,9 +284,9 @@ void display (void)
 	glLoadIdentity();
 
 	//gluLookAt(0,30,20,0,0,0,0,1,0);
-	glMultMatrixd(cam->getOrientation());
+	glMultMatrixd(object->cm_GetCamera()->getOrientation());
 	// позиция камеры
-	glMultMatrixd(cam->getPosition());
+	glMultMatrixd(object->cm_GetCamera()->getPosition());
 
 	firstLight.use();
 	secondLight.use(GL_LIGHT1);
@@ -360,6 +363,13 @@ void simulation(int)
 	glutTimerFunc(delayPerFrames,simulation,0);
 };
 
+// функция вызывается когда начинается фаза простоя
+void onIdle()
+{
+	// принудительно перерисовать окно
+	glutPostRedisplay();
+};
+
 // обработчик нажатия обычных клавиш
 void processNormalKeys(unsigned char key, int x, int y)
 {
@@ -375,29 +385,34 @@ void processNormalKeys(unsigned char key, int x, int y)
 			exit(0);
 			break;
 		}
+		case VK_TAB:
+		{
+			object->cm_GetCamera()->cm_NextCamera();
+			break;
+		}
 		case VK_D:
 		{
-			cam->moveRight();
+			object->cm_GetCamera()->moveRight();
 			break;
 		}
 		case VK_A:
 		{
-			cam->moveLeft();
+			object->cm_GetCamera()->moveLeft();
 			break;
 		}
 		case VK_W:
 		{
-			cam->moveUp();
+			object->cm_GetCamera()->moveUp();
 			break;
 		}
 		case VK_S:
 		{
-			cam->moveDown();
+			object->cm_GetCamera()->moveDown();
 			break;
 		}
 		case VK_R:
 		{
-			cam->resetCamera();
+			object->cm_GetCamera()->resetCamera();
 			break;
 		}
 		case VK_T:
@@ -409,12 +424,12 @@ void processNormalKeys(unsigned char key, int x, int y)
 	{
 		case '+':
 		{
-			cam->moveForward();
+			object->cm_GetCamera()->moveForward();
 			break;
 		}
 		case '-':
 		{
-			cam->moveBack();
+			object->cm_GetCamera()->moveBack();
 			break;
 		}
 		case '1':
@@ -451,22 +466,22 @@ void processSpecialKeys(int key, int x, int y)
 		}
 		case GLUT_KEY_LEFT:
 		{
-			cam->moveRight();
+			object->cm_GetCamera()->moveRight();
 			break;
 		}
 		case GLUT_KEY_RIGHT:
 		{
-			cam->moveLeft();
+			object->cm_GetCamera()->moveLeft();
 			break;
 		}
 		case GLUT_KEY_UP:
 		{
-			cam->moveUp();
+			object->cm_GetCamera()->moveUp();
 			break;
 		}
 		case GLUT_KEY_DOWN:
 		{
-			cam->moveDown();
+			object->cm_GetCamera()->moveDown();
 			break;
 		}
 	}
@@ -478,7 +493,6 @@ void onExit()
 	{
 		_cerr.close();
 	}
-	delete cam;
 	delete object;
 	_3dsFile.empty();
 }
@@ -518,8 +532,8 @@ bool check3ds(std::wstring a_fileName)
 	_ifs.open(a_fileName.c_str(),ios_base::in|ios_base::binary|ios_base::beg);
 	if(!_ifs.is_open())
 	{
-		std::cerr<<"Возникли ошибки (не удалось открыть файл) при попытке чтения файла "<<ns_3ds::wstringToString(a_fileName)<<std::endl;
-		std::wcerr<<L"Возникли ошибки (не удалось открыть файл) при попытке чтения файла "<<a_fileName<<std::endl;
+		std::cerr<<"Возникли ошибки (не удалось открыть файл) при попытке чтения файла \""<<ns_3ds::wstringToString(a_fileName)<<'"'<<std::endl;
+		std::wcerr<<L"Возникли ошибки (не удалось открыть файл) при попытке чтения файла \""<<a_fileName<<'"'<<std::endl;
 		// error while opening file
 		_retVal=false;
 	} else
@@ -529,8 +543,8 @@ bool check3ds(std::wstring a_fileName)
 		if (_chunkID!=ns_3ds::chunks::MAIN)
 		{
 			_retVal=false;
-			std::cerr<<"Возникли ошибки (некорректный стартовый чанк) при попытке чтения файла "<<ns_3ds::wstringToString(a_fileName)<<std::endl;
-			std::wcerr<<L"Возникли ошибки (некорректный стартовый чанк) при попытке чтения файла "<<a_fileName<<std::endl;
+			std::cerr<<"Возникли ошибки (некорректный стартовый чанк) при попытке чтения файла \""<<ns_3ds::wstringToString(a_fileName)<<'"'<<std::endl;
+			std::wcerr<<L"Возникли ошибки (некорректный стартовый чанк) при попытке чтения файла \""<<a_fileName<<'"'<<std::endl;
 		}
 		_ifs.close();
 	}
@@ -565,7 +579,6 @@ void wmain (int argc, wchar_t **argv)
 	{
 		_3dsFile=openFileNameW();
 	}
-	wcerr<<L"Загружается файл модели "<<_3dsFile<<endl;
 	// количество аргументов для инициализации GLUT
 	int _argc4GLUT=0;
 	// инициализация библиотеки GLUT
@@ -584,8 +597,6 @@ void wmain (int argc, wchar_t **argv)
 	atexit(onExit);
 	// переходим в полноэкранный режим
 	//glutFullScreen();
-
-	cam=new camera();
 	
 	hasVBO=glutExtensionSupported("GL_ARB_vertex_buffer_object")!=0; // check if VBO supported
 	hasFragmentShader=glutExtensionSupported("GL_ARB_fragment_shader")!=0; // check if fragment shader is supported
@@ -614,9 +625,14 @@ void wmain (int argc, wchar_t **argv)
 
 	// загрузка объектов по файлу конфигурации
 	object=new ns_3ds::c3ds();
+	wcerr<<L"Загрузка файла модели \""<<_3dsFile<<'"'<<endl;
 	object->load(_3dsFile);
 	
 	object->buffer(); // buffer objects to VBO
+
+	std::cerr<<"=================================="<<std::endl;
+	std::cerr<<"Загрузка текстов шейдеров"<<std::endl;
+	std::wcerr<<L"Загрузка текстов шейдеров"<<std::endl;
 
 	modelShader.loadVertexShader("Phong.vsh");
 	modelShader.loadFragmentShader("Phong.fsh");
@@ -630,8 +646,10 @@ void wmain (int argc, wchar_t **argv)
 	glutDisplayFunc(display);
 	// 5. устанавливаем функцию, которая будет вызываться при изменении размеров окна
 	glutReshapeFunc(reshape);
-	// 6. устанавливаем таймер для перерисовки окна по времени
-	glutTimerFunc(delayPerFrames,simulation,0);
+	//// 6. устанавливаем таймер для перерисовки окна по времени
+	//glutTimerFunc(delayPerFrames,simulation,0);
+	// 6. устанавливаем режим работы с максимально возможным fps
+	glutIdleFunc(onIdle);
 	// 7. устанавливаем обработчик обычных клавиш
 	glutKeyboardFunc(processNormalKeys);
 	// 8. устанавливаем обработчик функциональных клавиш

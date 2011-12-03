@@ -20,6 +20,8 @@ namespace ns_3ds
 	typedef bool (*ptChunkReaderMap) (tistream & a_istream, s3dsHeader & a_header, c3dsMap *a_map);
 	class c3dsLoader
 	{
+		static std::wstring cf_resourcesDir;
+
 		static ptChunkReader cm_getChunkReader(s3dsHeader & a_header);
 
 		static bool cm_chunkReaderUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
@@ -40,6 +42,7 @@ namespace ns_3ds
 		static bool cm_chunkReaderObjectMatte (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		static bool cm_chunkReaderObjectExternalProcessed (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		static bool cm_chunkReaderObjectTrimeshBlock (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
+		static bool cm_chunkReaderObjectCamera (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		static bool cm_chunkReaderObjectUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		#pragma endregion Объектные чанки
 
@@ -102,7 +105,7 @@ namespace ns_3ds
 		#pragma endregion Map чанки
 
 	public:
-		static bool load (tistream & a_istream, c3ds & a_object);
+		static bool load (tistream & a_istream, c3ds & a_object, std::wstring a_resourcesDir=L"");
 	};
 }
 

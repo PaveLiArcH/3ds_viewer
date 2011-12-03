@@ -83,7 +83,7 @@
     <ClCompile Include="3dsTextureDevIL.cpp" />
     <ClCompile Include="3dsTypes.cpp" />
     <ClCompile Include="3dsVertex.cpp" />
-    <ClCompile Include="camera.cpp" />
+    <ClCompile Include="3dsCamera.cpp" />
     <ClCompile Include="GLee.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="3ds.cpp" />
@@ -99,7 +99,7 @@
     <ClInclude Include="3dsTypes.h" />
     <ClInclude Include="3dsChunks.h" />
     <ClInclude Include="3dsVertex.h" />
-    <ClInclude Include="camera.h" />
+    <ClInclude Include="3dsCamera.h" />
     <ClInclude Include="GLee.h" />
     <ClInclude Include="glm\glm.hpp" />
     <ClInclude Include="GLUT.H" />

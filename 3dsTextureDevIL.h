@@ -29,8 +29,8 @@ namespace ns_3ds
 		static void changeMode();
 		static void useMode(bool mipMap=true);
 		c3dsTextureDevIL():loaded(false),mipMap(true) {};
-		bool load(std::wstring file, bool useMipMap=true, bool repeatS=true, bool repeatT=true);
-		bool load(c3dsMap *a_map, bool useMipMap=true, bool repeatS=true, bool repeatT=true);
+		bool load(std::wstring file, std::wstring a_resourceDir=L"", bool useMipMap=true, bool repeatS=true, bool repeatT=true);
+		bool load(c3dsMap *a_map, std::wstring a_resourceDir=L"", bool useMipMap=true, bool repeatS=true, bool repeatT=true);
 		bool bind();
 		void allowMimMap(bool allow);
 		~c3dsTextureDevIL();

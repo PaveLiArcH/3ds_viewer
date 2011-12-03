@@ -19,6 +19,8 @@
 #include "3dsVertex.h"
 #include "3dsTextureDevIL.h"
 
+#include "3dsCamera.h"
+
 using namespace std;
 using namespace glm;
 
@@ -26,6 +28,7 @@ namespace ns_3ds
 {
 	class c3dsMaterial;
 	class c3dsObject;
+	//class c3dsCamera;
 
 	class c3ds
 	{
@@ -45,6 +48,7 @@ namespace ns_3ds
 		static bool newOGL, hasVBO;
 		// инициализация
 		void init();
+		c3dsCamera cf_camera;
 	public:
 		// конструктор по умолчанию
 		c3ds();
@@ -62,6 +66,10 @@ namespace ns_3ds
 		void setScale(tFloat scale);
 		// проверка расширений
 		static void checkExtensions();
+		c3dsCamera * cm_GetCamera()
+		{
+			return &cf_camera;
+		}
 	};
 }
 

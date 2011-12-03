@@ -3,6 +3,7 @@
 #include "3ds.h"
 #include "3dsChunks.h"
 #include "3dsLoader.h"
+#include <Windows.h>
 
 using namespace std;
 
@@ -97,8 +98,18 @@ namespace ns_3ds
 		}
 		else
 		{
+			wchar_t *_path, *_file;
+			DWORD _length=GetFullPathNameW(fname.c_str(), NULL, NULL, NULL);
+			_path=new wchar_t[_length];
+			DWORD _totalLen=GetFullPathNameW(fname.c_str(), _length, _path, &_file);
+			if (_file)
+			{
+				_file[0]=0;
+			}
+			std::wstring _directory=_path;
 			// чтение идентификатора чанка
-			_retVal=ns_3ds::c3dsLoader::load(ifs, *this);
+			_retVal=ns_3ds::c3dsLoader::load(ifs, *this, _directory);
+			delete []_path;
 		}
 		std::cerr<<"Завершение чтения файла модели "<<_ansiName<<std::endl;
 		return _retVal;

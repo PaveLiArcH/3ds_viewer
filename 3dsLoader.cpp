@@ -3,11 +3,17 @@
 #include "3dsLoader.h"
 #include "3dsChunks.h"
 
+//glm
+#include "glm/glm.hpp"
+
 namespace ns_3ds
 {
-	bool c3dsLoader::load (tistream & a_istream, c3ds & a_object)
+	std::wstring c3dsLoader::cf_resourcesDir=L"";
+
+	bool c3dsLoader::load (tistream & a_istream, c3ds & a_object, std::wstring a_resourcesDir)
 	{
 		s3dsHeader _header;
+		cf_resourcesDir=a_resourcesDir;
 		while (!(a_istream.fail()||a_istream.eof()||((a_istream>>_header).eof())))
 		{
 			ptChunkReader _chunkReader=cm_getChunkReader(_header);
@@ -164,6 +170,8 @@ namespace ns_3ds
 			return &cm_chunkReaderObjectExternalProcessed;
 		case(chunks::TRIMESH):
 			return &cm_chunkReaderObjectTrimeshBlock;
+		case(chunks::CAMERA3DS):
+			return &cm_chunkReaderObjectCamera;
 		default:
 			return &cm_chunkReaderObjectUnknown;
 		}
@@ -210,6 +218,23 @@ namespace ns_3ds
 		std::streamoff _maxoff=a_istream.tellg();
 		_maxoff=_maxoff+(a_header.len-6);
 		bool _res=cm_chunkReaderObjectTrimesh(a_istream, _maxoff, a_object);
+		return true;
+	}
+
+	bool c3dsLoader::cm_chunkReaderObjectCamera (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден чанк камеры объекта "<<std::hex<<a_header.id<<std::endl;
+		tFloat _vector[3];
+		a_istream.read((char*)&(_vector[0]),4);
+		a_istream.read((char*)&(_vector[2]),4);
+		a_istream.read((char*)&(_vector[1]),4);
+		vec3 _position(_vector[0],_vector[1],_vector[2]);
+		a_istream.read((char*)&(_vector[0]),4);
+		a_istream.read((char*)&(_vector[2]),4);
+		a_istream.read((char*)&(_vector[1]),4);
+		vec3 _target(_vector[0],_vector[1],_vector[2]);
+		a_istream.ignore(2*4);
+		a_object.cm_GetCamera()->cm_Add(_position, _target);
 		return true;
 	}
 
@@ -542,7 +567,7 @@ namespace ns_3ds
 		_maxoff=_maxoff+(a_header.len-6);
 		c3dsMap *_map=cm_chunkReaderMap(a_istream, _maxoff);
 		c3dsTextureDevIL *_texture=new c3dsTextureDevIL();
-		_texture->load(_map);
+		_texture->load(_map, cf_resourcesDir);
 		delete _map;
 		a_material->SetTextureMap(_texture);
 		return true;
@@ -765,7 +790,6 @@ namespace ns_3ds
 	bool c3dsLoader::cm_chunkReaderMapUnknown (tistream & a_istream, s3dsHeader & a_header, c3dsMap *a_map)
 	{
 		std::cerr<<"Найден неизвестный чанк "<<std::hex<<a_header.id<<" в блоке map чанков"<<std::endl;
-		tFloat _res=0.0f;
 		if (a_header.len<6)
 		{
 			std::cerr<<"\tНекорректная длина чанка"<<std::endl;
@@ -773,7 +797,7 @@ namespace ns_3ds
 			return false;
 		}
 		a_istream.seekg(a_header.len-6, std::ios::cur);
-		return _res;
+		return true;
 	}
 	#pragma endregion Map чанки
 }

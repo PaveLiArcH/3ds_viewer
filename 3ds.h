@@ -43,6 +43,10 @@ namespace ns_3ds
 		hash_map<string, c3dsMaterial *> cf_material;
 		// величина единицы
 		tFloat cf_unit;
+		// масштаб
+		tDouble cf_scale;
+		// матрица масштабирования
+		tFloat cf_scaleMatrix[16];
 		// объекты
 		vector<c3dsObject *> cf_object;
 		static bool newOGL, hasVBO;
@@ -63,7 +67,11 @@ namespace ns_3ds
 		// буферизация в VBO
 		void buffer();
 		// установка масштаба
-		void setScale(tFloat scale);
+		void cm_SetScale(tDouble a_scale);
+		// увеличение размера
+		void cm_UpScale();
+		// уменьшение размера
+		void cm_DownScale();
 		// проверка расширений
 		static void checkExtensions();
 		c3dsCamera * cm_GetCamera()

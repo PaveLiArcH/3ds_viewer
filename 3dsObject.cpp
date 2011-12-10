@@ -185,7 +185,7 @@ namespace ns_3ds
 		bool _retVal=false;
 		glPushMatrix(); // save current matrix
 		//// применение матрицы поворота
-		//glMultMatrixf(directionMatrix);
+		glMultMatrixf(a_3ds->cf_scaleMatrix);
 		//// установка цвета
 		//glColor3f(position.color[0],position.color[1],position.color[2]);
 		if (c3ds::hasVBO) // has VBO
@@ -279,5 +279,19 @@ namespace ns_3ds
 		}
 		glPopMatrix(); // restore matrix
 		return _retVal;
+	}
+	
+	tFloat c3dsObject::cm_FrustumTest(c3ds *a_3ds)
+	{
+		int p;
+		float d;
+		tFrustum *_frustum=a_3ds->cm_GetCamera()->GetFrustum();
+		for( p = 0; p < 6; p++ )
+		{
+			d = (*_frustum)[p][0] * cf_sphere.x + (*_frustum)[p][1] * cf_sphere.y + (*_frustum)[p][2] * cf_sphere.z + (*_frustum)[p][3];
+			if( d <= -cf_sphereRadius )
+				return 0;
+		}
+		return d + cf_sphereRadius;
 	}
 }

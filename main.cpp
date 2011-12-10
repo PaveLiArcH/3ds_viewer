@@ -31,71 +31,10 @@ std::ofstream _cerr;
 // переменна€ дл€ чтени€ пути к модели
 std::wstring _3dsFile;
 
-int frame=0,time,timebase=0,w,h,delayPerFrames=20,filterMode=0,g_nMaxAnisotropy;
+int frame=0,time,timebase=0,w,h,delayPerFrames=20,filterMode=0;
 char s[20];
 bool isDrawingFps=true, isDrawingBack=false;
-sVertex surface[]={
-	sVertex(-1.5*surfaceSpace,0,-1.5*surfaceSpace),
-	sVertex(-1.5*surfaceSpace,0,-0.5*surfaceSpace),
-	sVertex(-1.5*surfaceSpace,0,0.5*surfaceSpace),
-	sVertex(-1.5*surfaceSpace,0,1.5*surfaceSpace),
 
-	sVertex(-0.5*surfaceSpace,0,-1.5*surfaceSpace),
-	sVertex(-0.5*surfaceSpace,0,-0.5*surfaceSpace),
-	sVertex(-0.5*surfaceSpace,0,0.5*surfaceSpace),
-	sVertex(-0.5*surfaceSpace,0,1.5*surfaceSpace),
-
-	sVertex(0.5*surfaceSpace,0,-1.5*surfaceSpace),
-	sVertex(0.5*surfaceSpace,0,-0.5*surfaceSpace),
-	sVertex(0.5*surfaceSpace,0,0.5*surfaceSpace),
-	sVertex(0.5*surfaceSpace,0,1.5*surfaceSpace),
-
-	sVertex(1.5*surfaceSpace,0,-1.5*surfaceSpace),
-	sVertex(1.5*surfaceSpace,0,-0.5*surfaceSpace),
-	sVertex(1.5*surfaceSpace,0,0.5*surfaceSpace),
-	sVertex(1.5*surfaceSpace,0,1.5*surfaceSpace),
-};
-GLfloat surfaceTexCoord[]={
-	0.0,0.0,
-	1.0,0.0,
-	2.0,0.0,
-	3.0,0.0,
-
-	0.0,1.0,
-	1.0,1.0,
-	2.0,1.0,
-	3.0,1.0,
-
-	0.0,2.0,
-	1.0,2.0,
-	2.0,2.0,
-	3.0,2.0,
-
-	0.0,3.0,
-	1.0,3.0,
-	2.0,3.0,
-	3.0,3.0,
-};
-GLuint surfaceIndex[]={
-	0,1,5,
-	0,5,4,
-	1,2,6,
-	1,6,5,
-	2,3,7,
-	2,7,6,
-	4,5,9,
-	4,9,8,
-	5,6,10,
-	5,10,9,
-	6,7,11,
-	6,11,10,
-	8,9,13,
-	8,13,12,
-	9,10,14,
-	9,14,13,
-	10,11,15,
-	10,15,14,
-};
 GLfloat *surfaceIndexPoint,*surfaceNormal;
 sVertexColor axes[]={
 	// красна€ ось Ox
@@ -107,32 +46,6 @@ sVertexColor axes[]={
 	// син€€ ось Oy
 	sVertexColor(0.0,-surfaceSpace/2,0.0,0.0,0.0,1.0),
 	sVertexColor(0.0,surfaceSpace,0.0,0.0,0.0,1.0),
-};
-
-sVertex block[]={
-	sVertex(-halfWi, -halfWi, +halfWi),
-	sVertex(-halfWi, +halfWi, +halfWi),
-	sVertex(-halfWi, +halfWi, -halfWi),
-	sVertex(-halfWi, -halfWi, -halfWi),
-	
-	sVertex(+halfWi, -halfWi, +halfWi),
-	sVertex(+halfWi, +halfWi, +halfWi),
-	sVertex(+halfWi, +halfWi, -halfWi),
-	sVertex(+halfWi, -halfWi, -halfWi),
-};
-GLuint blockIndexes[]={
-	0, 4, 5, 1,
-	3, 0, 1, 2,
-	7, 3, 2, 6,
-	4, 7, 6, 5,
-	4, 0, 3, 7,
-	1, 5, 6, 2,
-};
-GLfloat blockMatrix[16]={
-	1,0,0,0,
-	0,1,0,0,
-	0,0,1,0,
-	0,0,0,1
 };
 
 GLfloat ambMat[4]={
@@ -175,20 +88,13 @@ GLfloat dirLig2[3]={
 	0.0f,0.0f,-1.0f
 };
 ILuint devilError;
-ns_3ds::c3dsTextureDevIL surfaceTex;
 
 ns_3ds::c3ds *object;
 bool newOGL=false,hasVBO=false,hasFragmentShader=false,hasVertexShader=false;
 
-shader modelShader,planeShader;
-ns_3ds::c3dsMaterial planeMaterial=ns_3ds::c3dsMaterial(ambMat,difMat,speMat,0,64.0f);
+shader modelShader;
 lightSource firstLight=lightSource(ambLig1,difLig1,speLig1,posLig1,dirLig1);
 lightSource secondLight=lightSource(ambLig2,difLig2,speLig2,posLig2,dirLig2);
-
-void addBlock(sVertex center, vector<sVertex> &v)
-{
-	v.push_back(center);
-}
 
 // посимвольна€ отрисовка строки шрифтом font
 void renderBitmapString(float x, float y, void *font, char *string)
@@ -283,40 +189,12 @@ void display (void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	//gluLookAt(0,30,20,0,0,0,0,1,0);
 	glMultMatrixd(object->cm_GetCamera()->getOrientation());
 	// позици€ камеры
 	glMultMatrixd(object->cm_GetCamera()->getPosition());
 
 	firstLight.use();
 	secondLight.use(GL_LIGHT1);
-
-	planeMaterial.cm_Use();
-	planeShader.activate();
-
-	glEnable(GL_TEXTURE_2D);
-	glClientActiveTexture(GL_TEXTURE0);
-
-	GLint texLoc = glGetUniformLocation(planeShader.getProgramId(), "MyTex");
-
-	glUniform1i(texLoc,0);
-
-	glTexEnvi ( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-
-	glColor3f(0.4f,0.8f,0.4f);
-	glNormal3f(0.0,1.0,0.0);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	surfaceTex.bind();
-
-	glTexCoordPointer(2,GL_FLOAT,0,surfaceTexCoord);
-	glVertexPointer(3,GL_FLOAT,sizeof(sVertex),&surface[0].sf_coordinate);
-	glDrawElements(GL_TRIANGLES,18*3,GL_UNSIGNED_INT,surfaceIndex);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
-
-	glDisable(GL_TEXTURE_2D);
 
 	modelShader.activate();
 
@@ -325,9 +203,6 @@ void display (void)
 	shader::disactivate();
 
 	glCullFace(GL_BACK);
-
-	glColor3f(0.2f,0.2f,0.2f);
-	glutWireSphere(0.07, 16, 16);
 	
 	if (isDrawingFps)
 	{
@@ -418,6 +293,19 @@ void processNormalKeys(unsigned char key, int x, int y)
 		case VK_T:
 		{
 			ns_3ds::c3dsTextureDevIL::changeMode();
+			break;
+		}
+		case VK_L:
+		{
+			if (isDrawingBack)
+			{
+				glEnable(GL_CULL_FACE);
+			} else
+			{
+				glDisable(GL_CULL_FACE);
+			}
+			isDrawingBack=!isDrawingBack;
+			break;
 		}
 	}
 	switch(key)
@@ -450,18 +338,31 @@ void processNormalKeys(unsigned char key, int x, int y)
 // обработчик нажати€ функциональных клавиш
 void processSpecialKeys(int key, int x, int y)
 {
+	int _modifiers=glutGetModifiers();
 	switch(key)
 	{
 		case GLUT_KEY_F2 : 
 				isDrawingFps=!isDrawingFps; break;
 		case GLUT_KEY_PAGE_DOWN:
 		{
-			delayPerFrames=delayPerFrames<100?delayPerFrames+5:delayPerFrames;
+			if (_modifiers & GLUT_ACTIVE_CTRL)
+			{
+				object->cm_DownScale();
+			} else
+			{
+				delayPerFrames=delayPerFrames<100?delayPerFrames+5:delayPerFrames;
+			}
 			break;
 		}
 		case GLUT_KEY_PAGE_UP:
 		{
-			delayPerFrames=delayPerFrames>5?delayPerFrames-5:delayPerFrames;
+			if (_modifiers & GLUT_ACTIVE_CTRL)
+			{
+				object->cm_UpScale();
+			} else
+			{
+				delayPerFrames=delayPerFrames>5?delayPerFrames-5:delayPerFrames;
+			}
 			break;
 		}
 		case GLUT_KEY_LEFT:
@@ -638,10 +539,6 @@ void wmain (int argc, wchar_t **argv)
 	modelShader.loadFragmentShader("Phong.fsh");
 	modelShader.createProgram();
 
-	planeShader.loadVertexShader("Phong.vsh");
-	planeShader.loadFragmentShader("Phong.l3.fsh");
-	planeShader.createProgram();
-
 	// 4. устанавливаем функцию, котора€ будет вызыватьс€ дл€ перерисовки окна
 	glutDisplayFunc(display);
 	// 5. устанавливаем функцию, котора€ будет вызыватьс€ при изменении размеров окна
@@ -661,8 +558,6 @@ void wmain (int argc, wchar_t **argv)
 	glEnable(GL_LIGHT1);
 	glEnable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
-
-	surfaceTex.load(L"textures\\ceram.jpg");
 
 	// вывод строк описывающих OpenGL
 	// вывод производител€

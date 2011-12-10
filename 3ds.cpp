@@ -9,7 +9,6 @@ using namespace std;
 
 namespace ns_3ds
 {
-
 	bool c3ds::newOGL=false;
 	bool c3ds::hasVBO=false;
 
@@ -31,6 +30,7 @@ namespace ns_3ds
 	void c3ds::init()
 	{
 		cf_unit=1.0f;
+		cm_SetScale(1.0);
 	}
 
 	// конструктор по умолчанию
@@ -75,12 +75,24 @@ namespace ns_3ds
 		}
 	}
 
-	void c3ds::setScale(GLfloat scale)
+	void c3ds::cm_SetScale(tDouble a_scale)
 	{
-		/*for (int j=0; j<3; j++)
+		cf_scale=a_scale;
+		for(int i=0; i<16; i++)
 		{
-			directionMatrix[j*4+j]=scale;
-		}*/
+			cf_scaleMatrix[i]=((i%4)==(i>>2))?(float)cf_scale:0.0f;
+		}
+		cf_scaleMatrix[15]=1.0f;
+	}
+
+	void c3ds::cm_UpScale()
+	{
+		cm_SetScale(cf_scale*2);
+	}
+
+	void c3ds::cm_DownScale()
+	{
+		cm_SetScale(cf_scale/2);
 	}
 
 	bool c3ds::load(wstring fname)

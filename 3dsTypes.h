@@ -8,6 +8,7 @@
 namespace ns_3ds
 {
 	typedef GLfloat tFloat;
+	typedef GLdouble tDouble;
 	typedef GLint tInt;
 	typedef GLuint tUint;
 	typedef GLenum tEnum;
@@ -19,6 +20,7 @@ namespace ns_3ds
 	typedef tFloat tVec4[4];
 	typedef std::ostream tostream;
 	typedef std::istream tistream;
+	typedef tFloat tFrustum[6][4];
 
 	std::string wstringToString(std::wstring a_string);
 	std::wstring stringToWstring(std::string a_string);

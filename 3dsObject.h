@@ -1,6 +1,7 @@
 #ifndef __3dsObject_h__
 #define __3dsObject_h__
 
+#include "glm\glm.hpp"
 #include <string>
 #include "3dsTypes.h"
 #include <hash_map>
@@ -43,6 +44,11 @@ namespace ns_3ds
 		tUint cf_vertexVBO;
 		// буферизованные данные
 		sVertexNormalTex *cf_vertexBuffer;
+		// frustum occluder
+		glm::vec3 cf_sphere;
+		tFloat cf_sphereRadius;
+		// OC occluder
+		///
 	public:
 		c3dsObject();
 		~c3dsObject();
@@ -62,6 +68,7 @@ namespace ns_3ds
 
 		bool cm_Buffer(c3ds *a_3ds);
 		bool cm_Render(c3ds *a_3ds);
+		tFloat cm_FrustumTest(c3ds *a_3ds);
 	};
 }
 

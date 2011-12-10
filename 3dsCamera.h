@@ -25,6 +25,8 @@ namespace ns_3ds
 		void updatePositionMatrix();
 		// Выполняет обновление матрицы ориентации камеры. Параметров нет.
 		void updateOrientationMatrix();
+		// коэффициенты для Frustum Culling
+		tFrustum cf_frustum;
 	public:
 		// Конструктор по умолчанию. Задает стандартное положение камеры.
 		c3dsCamera();
@@ -35,6 +37,7 @@ namespace ns_3ds
 		// Конструктор с параметрами. Задает точку обзора и ориентацию камеры. Параметры – 2 трехкомпонентных вектора, задающих положение и точку обзора.
 		tInt cm_Add(vec3 a_position, vec3 a_viewPoint);
 		tInt cm_NextCamera();
+		tInt cm_PrevCamera();
 		// Вызов функций перерасчета матриц камеры.
 		void applyCamera();
 		// Сброс камеры в состояние по умолчанию.
@@ -55,6 +58,10 @@ namespace ns_3ds
 		void moveUp();
 		// Перемещение вниз по сфере на единичный вектор.
 		void moveDown();
+		// обновление коэффициентов для Frustum Culling-а
+		void cm_UpdateFrustum();
+		// получение коэффициентов
+		tFrustum * GetFrustum();
 	};
 }
 

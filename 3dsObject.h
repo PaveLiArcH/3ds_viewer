@@ -47,8 +47,9 @@ namespace ns_3ds
 		// frustum occluder
 		glm::vec3 cf_sphere;
 		tFloat cf_sphereRadius;
+		tFloat cf_distance;
 		// OC occluder
-		///
+		tFloat cf_minX,cf_maxX,cf_minY,cf_maxY,cf_minZ,cf_maxZ;
 	public:
 		c3dsObject();
 		~c3dsObject();
@@ -69,7 +70,11 @@ namespace ns_3ds
 		bool cm_Buffer(c3ds *a_3ds);
 		bool cm_Render(c3ds *a_3ds);
 		tFloat cm_FrustumTest(c3ds *a_3ds);
+
+		friend bool operator<(c3dsObject &a_object, c3dsObject &a_otherObject);
 	};
+
+	bool operator<(c3dsObject &a_object, c3dsObject &a_otherObject);
 }
 
 #include "3ds.h"

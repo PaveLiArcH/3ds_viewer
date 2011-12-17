@@ -13,6 +13,7 @@ namespace ns_3ds
 		cf_texCount=0;
 		cf_vertexBuffer=NULL;
 		cf_vertexVBO=0;
+		cf_sphereRadius=0;
 	}
 
 	c3dsObject::~c3dsObject()
@@ -120,6 +121,30 @@ namespace ns_3ds
 	bool c3dsObject::cm_Buffer(c3ds *a_3ds)
 	{
 		bool _retVal=false;
+		if (cf_verticesCount>0)
+		{
+			cf_minX=cf_verticesList[0];
+			cf_maxX=cf_verticesList[0];
+			cf_minY=cf_verticesList[1];
+			cf_maxY=cf_verticesList[1];
+			cf_minZ=cf_verticesList[2];
+			cf_maxZ=cf_verticesList[2];
+			for (int i=1; i<cf_verticesCount; i++)
+			{
+				int _t=3*i;
+				cf_maxX=(cf_verticesList[_t]>cf_maxX)?cf_verticesList[_t]:cf_maxX;
+				cf_minX=(cf_verticesList[_t]<cf_minX)?cf_verticesList[_t]:cf_minX;
+				cf_maxY=(cf_verticesList[_t+1]>cf_maxY)?cf_verticesList[_t+1]:cf_maxY;
+				cf_minY=(cf_verticesList[_t+1]<cf_minY)?cf_verticesList[_t+1]:cf_minY;
+				cf_maxZ=(cf_verticesList[_t+2]>cf_maxZ)?cf_verticesList[_t+2]:cf_maxZ;
+				cf_minZ=(cf_verticesList[_t+2]<cf_minZ)?cf_verticesList[_t+2]:cf_minZ;
+			}
+			cf_sphere.x=(cf_minX+cf_maxX)/2;
+			cf_sphere.y=(cf_minY+cf_maxY)/2;
+			cf_sphere.z=(cf_minZ+cf_maxZ)/2;
+			glm::vec3 _v(cf_minX, cf_minY, cf_minZ);
+			cf_sphereRadius=glm::length(cf_sphere-_v);
+		}
 		if (!cf_vertexBuffer)
 		{
 			cf_vertexBuffer=new sVertexNormalTex [3*cf_indexCount];
@@ -290,8 +315,17 @@ namespace ns_3ds
 		{
 			d = (*_frustum)[p][0] * cf_sphere.x + (*_frustum)[p][1] * cf_sphere.y + (*_frustum)[p][2] * cf_sphere.z + (*_frustum)[p][3];
 			if( d <= -cf_sphereRadius )
-				return 0;
+			{
+				cf_distance=0.0f;
+				return cf_distance;
+			}
 		}
-		return d + cf_sphereRadius;
+		cf_distance=d+cf_sphereRadius;
+		return cf_distance;
+	}
+
+	bool operator<(c3dsObject &a_object, c3dsObject &a_otherObject)
+	{
+		return (a_object.cf_distance<a_otherObject.cf_distance);
 	}
 }

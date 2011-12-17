@@ -107,6 +107,7 @@ namespace ns_3ds
 	{
 		updateOrientationMatrix();
 		updatePositionMatrix();
+		cm_UpdateFrustum();
 	}
 
 	void c3dsCamera::resetCamera()

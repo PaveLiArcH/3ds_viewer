@@ -69,9 +69,24 @@ namespace ns_3ds
 
 	void c3ds::render(int filterMode)
 	{
+		int _frustumFiltered=0;
+		set<c3dsObject *> _set;
 		for (std::size_t i=0; i<cf_object.size(); i++)
 		{
-			cf_object[i]->cm_Render(this);
+			if (cf_object[i]->cm_FrustumTest(this))
+			{
+				_set.insert(cf_object[i]);
+			} else
+			{
+				_frustumFiltered++;
+			}
+		}
+		for (set<c3dsObject *>::iterator _it=_set.begin(); _it!=_set.end(); ++_it)
+		{
+			if (_it._Ptr->_Myval)
+			{
+				_it._Ptr->_Myval->cm_Render(this);
+			}
 		}
 	}
 

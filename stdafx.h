@@ -16,6 +16,7 @@
 #include <windows.h>
 #include <clocale>
 #include <wchar.h>
+#include <algorithm>
 
 using namespace std;
 

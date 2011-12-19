@@ -11,11 +11,13 @@ namespace ns_3ds
 {
 	bool c3ds::newOGL=false;
 	bool c3ds::hasVBO=false;
+	bool c3ds::hasQueries=false;
 
 	void c3ds::checkExtensions()
 	{
 		c3ds::newOGL=(atof((const char *)glGetString(GL_VERSION))>=1.5f); // check OGL version
 		c3ds::hasVBO=glutExtensionSupported("GL_ARB_vertex_buffer_object")!=0; // check if VBO supported
+		c3ds::hasQueries=glutExtensionSupported("GL_ARB_occlusion_query")!=0;
 	}
 
 	// буферизация данных объекта в VBO
@@ -69,23 +71,21 @@ namespace ns_3ds
 
 	void c3ds::render(int filterMode)
 	{
-		set<c3dsObject *> _set;
+		vector<c3dsObject *> _vector;
 		for (std::size_t i=0; i<cf_object.size(); i++)
 		{
 			if (cf_object[i]->cm_FrustumTest(this))
 			{
-				_set.insert(cf_object[i]);
+				_vector.push_back(cf_object[i]);
 			} else
 			{
 				_total_frustumed++;
 			}
 		}
-		for (set<c3dsObject *>::iterator _it=_set.begin(); _it!=_set.end(); ++_it)
+		sort(_vector.begin(), _vector.end(), Compare3dsObjects);
+		for (std::size_t i=0; i<_vector.size(); i++)
 		{
-			if (_it._Ptr->_Myval)
-			{
-				_it._Ptr->_Myval->cm_Render(this);
-			}
+			_vector[i]->cm_Render(this);
 		}
 	}
 

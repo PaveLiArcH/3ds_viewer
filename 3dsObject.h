@@ -49,6 +49,9 @@ namespace ns_3ds
 		tFloat cf_sphereRadius;
 		tFloat cf_distance;
 		// OC occluder
+		sVertex *cf_occluderBuffer;
+		tUint cf_occluderVBO;
+		// occluder common data
 		tFloat cf_minX,cf_maxX,cf_minY,cf_maxY,cf_minZ,cf_maxZ;
 	public:
 		c3dsObject();
@@ -70,12 +73,17 @@ namespace ns_3ds
 		bool cm_Buffer(c3ds *a_3ds);
 		bool cm_Render(c3ds *a_3ds);
 		bool cm_FrustumTest(c3ds *a_3ds);
+		bool cm_OcclusionTest(c3ds *a_3ds);
 		void cm_ScaleChanged(tDouble a_newScale);
+		void cm_RecalcFrustum(tDouble a_newScale);
+		void cm_RecalcOccluder(tDouble a_newScale);
 
 		friend bool operator<(c3dsObject &a_object, c3dsObject &a_otherObject);
 	};
 
 	bool operator<(c3dsObject &a_object, c3dsObject &a_otherObject);
+
+	bool Compare3dsObjects(c3dsObject *a_object, c3dsObject *a_otherObject);
 }
 
 #include "3ds.h"

@@ -19,6 +19,7 @@ namespace ns_3ds
 		cf_vertexBuffer=NULL;
 		cf_vertexVBO=0;
 		cf_sphereRadius=0;
+		cf_occluderBuffer=NULL;
 	}
 
 	c3dsObject::~c3dsObject()
@@ -144,11 +145,8 @@ namespace ns_3ds
 				cf_maxZ=(cf_verticesList[_t+2]>cf_maxZ)?cf_verticesList[_t+2]:cf_maxZ;
 				cf_minZ=(cf_verticesList[_t+2]<cf_minZ)?cf_verticesList[_t+2]:cf_minZ;
 			}
-			cf_sphere.x=(cf_maxX+cf_minX)/2;
-			cf_sphere.y=(cf_maxY+cf_minY)/2;
-			cf_sphere.z=(cf_maxZ+cf_minZ)/2;
-			glm::vec3 _v(cf_minX, cf_minY, cf_minZ);
-			cf_sphereRadius=glm::length(cf_sphere-_v);
+			cm_RecalcFrustum(1.0);
+			cm_RecalcOccluder(1.0);
 		}
 		if (!cf_vertexBuffer)
 		{
@@ -333,6 +331,12 @@ namespace ns_3ds
 
 	void c3dsObject::cm_ScaleChanged(tDouble a_newScale)
 	{
+		cm_RecalcFrustum(a_newScale);
+		cm_RecalcOccluder(a_newScale);
+	}
+
+	void c3dsObject::cm_RecalcFrustum(tDouble a_newScale)
+	{
 		cf_sphere.x=(cf_maxX+cf_minX)/2;
 		cf_sphere.y=(cf_maxY+cf_minY)/2;
 		cf_sphere.z=(cf_maxZ+cf_minZ)/2;
@@ -342,8 +346,66 @@ namespace ns_3ds
 		cf_sphereRadius=glm::length(cf_sphere-_v);
 	}
 
+	void c3dsObject::cm_RecalcOccluder(tDouble a_newScale)
+	{
+		tFloat _minX=cf_minX*a_newScale,_maxX=cf_maxX*a_newScale;
+		tFloat _minY=cf_minY*a_newScale,_maxY=cf_maxY*a_newScale;
+		tFloat _minZ=cf_minZ*a_newScale,_maxZ=cf_maxZ*a_newScale;
+
+		sVertex _occluder[8]={
+			sVertex(_minX, _minY, _maxZ),
+			sVertex(_minX, _maxY, _maxZ),
+			sVertex(_minX, _maxY, _minZ),
+			sVertex(_minX, _minY, _minZ),
+
+			sVertex(_maxX, _minY, _maxZ),
+			sVertex(_maxX, _maxY, _maxZ),
+			sVertex(_maxX, _maxY, _minZ),
+			sVertex(_maxX, _minY, _minZ), 
+		};
+
+		tUint _indexes[]={
+			0, 4, 5, 1,
+			3, 0, 1, 2,
+			7, 3, 2, 6,
+			4, 7, 6, 5,
+			4, 0, 3, 7,
+			1, 5, 6, 2,
+		};
+
+		if (cf_occluderBuffer)
+		{
+			delete []cf_occluderBuffer;
+		} else
+		{
+			glGenBuffers(1, &cf_occluderVBO);
+		}
+		cf_occluderBuffer=new sVertex[24];
+		for(int i=0;i<24;i++) // read indexes
+		{
+			cf_occluderBuffer[i]=_occluder[_indexes[i]];
+		}
+
+		// привязка буфера
+		glBindBuffer(GL_ARRAY_BUFFER, cf_occluderVBO);
+		// создание и инициализация области хранения данных для буферного объекта
+		glBufferData(GL_ARRAY_BUFFER, 24*sizeof(sVertex), cf_occluderBuffer, GL_STATIC_DRAW);
+		// отключение буфера
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	bool c3dsObject::cm_OcclusionTest(c3ds *a_3ds)
+	{
+		return true;
+	}
+
 	bool operator<(c3dsObject &a_object, c3dsObject &a_otherObject)
 	{
 		return (a_object.cf_distance<a_otherObject.cf_distance);
+	}
+
+	bool Compare3dsObjects(c3dsObject *a_object, c3dsObject *a_otherObject)
+	{
+		return ((*a_object)<(*a_otherObject));
 	}
 }

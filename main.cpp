@@ -10,6 +10,7 @@
 #include "glm/glm.hpp"
 //glut (freeglut now)
 #include "glut.h"
+#include <iomanip>
 //self implemented
 #include "stdafx.h"
 #include "vkscancodes.h"
@@ -21,9 +22,6 @@
 #include "3dsVertex.h"
 #include "3dsTextureDevIL.h"
 
-using namespace glm;
-using namespace std;
-using ns_3ds::sVertex;
 using ns_3ds::sVertexColor;
 
 std::ofstream _cerr;
@@ -31,8 +29,9 @@ std::ofstream _cerr;
 // переменная для чтения пути к модели
 std::wstring _3dsFile;
 
-int frame=0,time,timebase=0,w,h,delayPerFrames=20,filterMode=0;
-char s[20];
+int _total_frustumed=0,frame=0,_time,timebase=0,w,h,delayPerFrames=20,filterMode=0;
+std::string _str;
+double _lastFps=0;
 bool isDrawingFps=true, isDrawingBack=false;
 
 GLfloat *surfaceIndexPoint,*surfaceNormal;
@@ -99,17 +98,11 @@ lightSource secondLight=lightSource(ambLig2,difLig2,speLig2,posLig2,dirLig2);
 // посимвольная отрисовка строки шрифтом font
 void renderBitmapString(float x, float y, void *font, char *string)
 {
-	//glEnable(GL_COLOR_LOGIC_OP);
-	//glLogicOp(GL_XOR);
-	glEnable(GL_BLEND);
-	glBlendFuncSeparate(GL_ZERO, GL_ONE_MINUS_DST_COLOR, GL_ZERO, GL_DST_ALPHA);
 	glRasterPos2f(x, y);
 	for (char *c=string; *c!='\0'; c++)
 	{
 		glutBitmapCharacter(font, *c);
 	}
-	glDisable(GL_BLEND);
-	//glDisable(GL_COLOR_LOGIC_OP);
 }
 
 // переход к ортографической проекции
@@ -139,19 +132,25 @@ void resetPerspectiveProjection()
 void drawFps()
 {
 	frame++;
-	time=glutGet(GLUT_ELAPSED_TIME);
-	if (time - timebase > 1000) {
-		sprintf(s,"FPS:%4.1f",
-			frame*1000.0/(time-timebase));
-		timebase = time;
+	_time=glutGet(GLUT_ELAPSED_TIME);
+	if (_time - timebase > 1000)
+	{
+		_lastFps=frame*1000.0/(_time-timebase);
+		timebase = _time;
 		frame = 0;
 		//printf("%s\n",s);
 	}
-
+	std::ostringstream _stream;
+	_stream.precision(3);
+	_stream<<"FPS: "<<_lastFps<<" frustumed: "<<_total_frustumed;
+	_str=_stream.str();
 	glPushMatrix();
 	glLoadIdentity();
 	setOrthographicProjection();
-	renderBitmapString(20,20,GLUT_BITMAP_9_BY_15,s);
+	glEnable(GL_COLOR_LOGIC_OP);
+	glLogicOp(GL_INVERT);
+	renderBitmapString(5,20,GLUT_BITMAP_9_BY_15,const_cast<char *>(_str.c_str()));
+	glDisable(GL_COLOR_LOGIC_OP);
 	glPopMatrix();
 	resetPerspectiveProjection();
 }
@@ -160,6 +159,7 @@ void drawFps()
 // в том числе и принудительно, по командам glutPostRedisplay
 void display (void)
 {
+	_total_frustumed=0;
 	// отчищаем буфер цвета и буфер глубины
 	int rst=glGetError();
 

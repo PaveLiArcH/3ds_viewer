@@ -27,4 +27,6 @@ using namespace std;
 #define halfWi 1
 #pragma endregion Определение значений
 
+extern int _total_frustumed;
+
 #endif

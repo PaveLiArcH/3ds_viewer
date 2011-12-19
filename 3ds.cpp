@@ -69,7 +69,6 @@ namespace ns_3ds
 
 	void c3ds::render(int filterMode)
 	{
-		int _frustumFiltered=0;
 		set<c3dsObject *> _set;
 		for (std::size_t i=0; i<cf_object.size(); i++)
 		{
@@ -78,7 +77,7 @@ namespace ns_3ds
 				_set.insert(cf_object[i]);
 			} else
 			{
-				_frustumFiltered++;
+				_total_frustumed++;
 			}
 		}
 		for (set<c3dsObject *>::iterator _it=_set.begin(); _it!=_set.end(); ++_it)
@@ -92,12 +91,16 @@ namespace ns_3ds
 
 	void c3ds::cm_SetScale(tDouble a_scale)
 	{
-		cf_scale=a_scale;
 		for(int i=0; i<16; i++)
 		{
-			cf_scaleMatrix[i]=((i%4)==(i>>2))?(float)cf_scale:0.0f;
+			cf_scaleMatrix[i]=((i%4)==(i>>2))?(float)a_scale:0.0f;
 		}
 		cf_scaleMatrix[15]=1.0f;
+		for(std::size_t i=0; i<cf_object.size(); i++)
+		{
+			cf_object[i]->cm_ScaleChanged(a_scale);
+		}
+		cf_scale=a_scale;
 	}
 
 	void c3ds::cm_UpScale()

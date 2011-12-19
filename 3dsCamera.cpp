@@ -224,115 +224,79 @@ namespace ns_3ds
 
 	void c3dsCamera::cm_UpdateFrustum()
 	{
-		float   proj[16];
-		float   modl[16];
-		float   clip[16];
-		float   t;
+		float _temp[16];
+		glm::mat4x4 _projection;
+		glm::mat4x4 _modelview;
 		
 		/* Узнаем текущую матрицу PROJECTION */
-		glGetFloatv( GL_PROJECTION_MATRIX, proj );
-		
+		glGetFloatv(GL_PROJECTION_MATRIX, _temp);
+		int _index=0;
+		for (int i=0; i<4; i++)
+		{
+			for (int j=0; j<4; j++)
+			{
+				_projection[i][j]=_temp[_index++];
+			}
+		}
 		/* Узнаем текущую матрицу MODELVIEW */
-		glGetFloatv( GL_MODELVIEW_MATRIX, modl );
-		
-		/* Комбинируем матрицы(перемножаем) */
-		clip[ 0] = modl[ 0] * proj[ 0] + modl[ 1] * proj[ 4] + modl[ 2] * proj[ 8] + modl[ 3] * proj[12];
-		clip[ 1] = modl[ 0] * proj[ 1] + modl[ 1] * proj[ 5] + modl[ 2] * proj[ 9] + modl[ 3] * proj[13];
-		clip[ 2] = modl[ 0] * proj[ 2] + modl[ 1] * proj[ 6] + modl[ 2] * proj[10] + modl[ 3] * proj[14];
-		clip[ 3] = modl[ 0] * proj[ 3] + modl[ 1] * proj[ 7] + modl[ 2] * proj[11] + modl[ 3] * proj[15];
- 
-		clip[ 4] = modl[ 4] * proj[ 0] + modl[ 5] * proj[ 4] + modl[ 6] * proj[ 8] + modl[ 7] * proj[12];
-		clip[ 5] = modl[ 4] * proj[ 1] + modl[ 5] * proj[ 5] + modl[ 6] * proj[ 9] + modl[ 7] * proj[13];
-		clip[ 6] = modl[ 4] * proj[ 2] + modl[ 5] * proj[ 6] + modl[ 6] * proj[10] + modl[ 7] * proj[14];
-		clip[ 7] = modl[ 4] * proj[ 3] + modl[ 5] * proj[ 7] + modl[ 6] * proj[11] + modl[ 7] * proj[15];
- 
-		clip[ 8] = modl[ 8] * proj[ 0] + modl[ 9] * proj[ 4] + modl[10] * proj[ 8] + modl[11] * proj[12];
-		clip[ 9] = modl[ 8] * proj[ 1] + modl[ 9] * proj[ 5] + modl[10] * proj[ 9] + modl[11] * proj[13];
-		clip[10] = modl[ 8] * proj[ 2] + modl[ 9] * proj[ 6] + modl[10] * proj[10] + modl[11] * proj[14];
-		clip[11] = modl[ 8] * proj[ 3] + modl[ 9] * proj[ 7] + modl[10] * proj[11] + modl[11] * proj[15];
- 
-		clip[12] = modl[12] * proj[ 0] + modl[13] * proj[ 4] + modl[14] * proj[ 8] + modl[15] * proj[12];
-		clip[13] = modl[12] * proj[ 1] + modl[13] * proj[ 5] + modl[14] * proj[ 9] + modl[15] * proj[13];
-		clip[14] = modl[12] * proj[ 2] + modl[13] * proj[ 6] + modl[14] * proj[10] + modl[15] * proj[14];
-		clip[15] = modl[12] * proj[ 3] + modl[13] * proj[ 7] + modl[14] * proj[11] + modl[15] * proj[15];
+		glGetFloatv(GL_MODELVIEW_MATRIX, _temp);
+		_index=0;
+		for (int i=0; i<4; i++)
+		{
+			for (int j=0; j<4; j++)
+			{
+				_modelview[i][j]=_temp[_index++];
+			}
+		}
+		glm::mat4x4 _muliplied=_projection*_modelview;
  
 		/* Находим A, B, C, D для ПРАВОЙ плоскости */
-		cf_frustum[0][0] = clip[ 3] - clip[ 0];
-		cf_frustum[0][1] = clip[ 7] - clip[ 4];
-		cf_frustum[0][2] = clip[11] - clip[ 8];
-		cf_frustum[0][3] = clip[15] - clip[12];
- 
+		cf_frustum[0].x = _muliplied[0][3]-_muliplied[0][0];
+		cf_frustum[0].y = _muliplied[1][3]-_muliplied[1][0];
+		cf_frustum[0].z = _muliplied[2][3]-_muliplied[2][0];
+		cf_frustum[0].w = _muliplied[3][3]-_muliplied[3][0];
 		/* Приводим уравнение плоскости к нормальному виду */
-		t = sqrt( cf_frustum[0][0] * cf_frustum[0][0] + cf_frustum[0][1] * cf_frustum[0][1] + cf_frustum[0][2] * cf_frustum[0][2] );
-		cf_frustum[0][0] /= t;
-		cf_frustum[0][1] /= t;
-		cf_frustum[0][2] /= t;
-		cf_frustum[0][3] /= t;
+		cf_frustum[0]=glm::normalize(cf_frustum[0]);
  
 		/* Находим A, B, C, D для ЛЕВОЙ плоскости */
-		cf_frustum[1][0] = clip[ 3] + clip[ 0];
-		cf_frustum[1][1] = clip[ 7] + clip[ 4];
-		cf_frustum[1][2] = clip[11] + clip[ 8];
-		cf_frustum[1][3] = clip[15] + clip[12];
- 
+		cf_frustum[1].x = _muliplied[0][3]+_muliplied[0][0];
+		cf_frustum[1].y = _muliplied[1][3]+_muliplied[1][0];
+		cf_frustum[1].z = _muliplied[2][3]+_muliplied[2][0];
+		cf_frustum[1].w = _muliplied[3][3]+_muliplied[3][0];
 		/* Приводим уравнение плоскости к нормальному виду */
-		t = sqrt( cf_frustum[1][0] * cf_frustum[1][0] + cf_frustum[1][1] * cf_frustum[1][1] + cf_frustum[1][2] * cf_frustum[1][2] );
-		cf_frustum[1][0] /= t;
-		cf_frustum[1][1] /= t;
-		cf_frustum[1][2] /= t;
-		cf_frustum[1][3] /= t;
+		cf_frustum[1]=glm::normalize(cf_frustum[1]);
  
 		/* Находим A, B, C, D для НИЖНЕЙ плоскости */
-		cf_frustum[2][0] = clip[ 3] + clip[ 1];
-		cf_frustum[2][1] = clip[ 7] + clip[ 5];
-		cf_frustum[2][2] = clip[11] + clip[ 9];
-		cf_frustum[2][3] = clip[15] + clip[13];
- 
+		cf_frustum[2].x = _muliplied[0][3]+_muliplied[0][1];
+		cf_frustum[2].y = _muliplied[1][3]+_muliplied[1][1];
+		cf_frustum[2].z = _muliplied[2][3]+_muliplied[2][1];
+		cf_frustum[2].w = _muliplied[3][3]+_muliplied[3][1];
 		/* Приводим уравнение плоскости к нормальному */
-		t = sqrt( cf_frustum[2][0] * cf_frustum[2][0] + cf_frustum[2][1] * cf_frustum[2][1] + cf_frustum[2][2] * cf_frustum[2][2] );
-		cf_frustum[2][0] /= t;
-		cf_frustum[2][1] /= t;
-		cf_frustum[2][2] /= t;
-		cf_frustum[2][3] /= t;
+		cf_frustum[2]=glm::normalize(cf_frustum[2]);
  
 		/* ВЕРХНЯЯ плоскость */
-		cf_frustum[3][0] = clip[ 3] - clip[ 1];
-		cf_frustum[3][1] = clip[ 7] - clip[ 5];
-		cf_frustum[3][2] = clip[11] - clip[ 9];
-		cf_frustum[3][3] = clip[15] - clip[13];
- 
-		/* Нормальный вид */
-		t = sqrt( cf_frustum[3][0] * cf_frustum[3][0] + cf_frustum[3][1] * cf_frustum[3][1] + cf_frustum[3][2] * cf_frustum[3][2] );
-		cf_frustum[3][0] /= t;
-		cf_frustum[3][1] /= t;
-		cf_frustum[3][2] /= t;
-		cf_frustum[3][3] /= t;
+		cf_frustum[3].x = _muliplied[0][3]-_muliplied[0][1];
+		cf_frustum[3].y = _muliplied[1][3]-_muliplied[1][1];
+		cf_frustum[3].z = _muliplied[2][3]-_muliplied[2][1];
+		cf_frustum[3].w = _muliplied[3][3]-_muliplied[3][1];
+		/* Приводим уравнение плоскости к нормальному */
+		cf_frustum[3]=glm::normalize(cf_frustum[3]);
  
 		/* ЗАДНЯЯ плоскость */
-		cf_frustum[4][0] = clip[ 3] - clip[ 2];
-		cf_frustum[4][1] = clip[ 7] - clip[ 6];
-		cf_frustum[4][2] = clip[11] - clip[10];
-		cf_frustum[4][3] = clip[15] - clip[14];
- 
-		/* Нормальный вид */
-		t = sqrt( cf_frustum[4][0] * cf_frustum[4][0] + cf_frustum[4][1] * cf_frustum[4][1] + cf_frustum[4][2] * cf_frustum[4][2] );
-		cf_frustum[4][0] /= t;
-		cf_frustum[4][1] /= t;
-		cf_frustum[4][2] /= t;
-		cf_frustum[4][3] /= t;
- 
+		cf_frustum[4].x = _muliplied[0][3]-_muliplied[0][2];
+		cf_frustum[4].y = _muliplied[1][3]-_muliplied[1][2];
+		cf_frustum[4].z = _muliplied[2][3]-_muliplied[2][2];
+		cf_frustum[4].w = _muliplied[3][3]-_muliplied[3][2];
+		/* Приводим уравнение плоскости к нормальному */
+		cf_frustum[4]=glm::normalize(cf_frustum[4]);
+  
 		/* ПЕРЕДНЯЯ плоскость */
-		cf_frustum[5][0] = clip[ 3] + clip[ 2];
-		cf_frustum[5][1] = clip[ 7] + clip[ 6];
-		cf_frustum[5][2] = clip[11] + clip[10];
-		cf_frustum[5][3] = clip[15] + clip[14];
- 
-		/* Нормальный вид */
-		t = sqrt( cf_frustum[5][0] * cf_frustum[5][0] + cf_frustum[5][1] * cf_frustum[5][1] + cf_frustum[5][2] * cf_frustum[5][2] );
-		cf_frustum[5][0] /= t;
-		cf_frustum[5][1] /= t;
-		cf_frustum[5][2] /= t;
-		cf_frustum[5][3] /= t;
+		cf_frustum[5].x = _muliplied[0][3]+_muliplied[0][2];
+		cf_frustum[5].y = _muliplied[1][3]+_muliplied[1][2];
+		cf_frustum[5].z = _muliplied[2][3]+_muliplied[2][2];
+		cf_frustum[5].w = _muliplied[3][3]+_muliplied[3][2];
+		/* Приводим уравнение плоскости к нормальному */
+		cf_frustum[5]=glm::normalize(cf_frustum[5]);
 	}
 
 	tFrustum * c3dsCamera::GetFrustum()

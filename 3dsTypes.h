@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include "GLee.h"
+#include "glm\glm.hpp"
 
 namespace ns_3ds
 {
@@ -20,7 +21,7 @@ namespace ns_3ds
 	typedef tFloat tVec4[4];
 	typedef std::ostream tostream;
 	typedef std::istream tistream;
-	typedef tFloat tFrustum[6][4];
+	typedef glm::vec4 tFrustum[6];
 
 	std::string wstringToString(std::wstring a_string);
 	std::wstring stringToWstring(std::string a_string);

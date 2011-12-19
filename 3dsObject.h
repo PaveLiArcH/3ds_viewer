@@ -69,7 +69,8 @@ namespace ns_3ds
 
 		bool cm_Buffer(c3ds *a_3ds);
 		bool cm_Render(c3ds *a_3ds);
-		tFloat cm_FrustumTest(c3ds *a_3ds);
+		bool cm_FrustumTest(c3ds *a_3ds);
+		void cm_ScaleChanged(tDouble a_newScale);
 
 		friend bool operator<(c3dsObject &a_object, c3dsObject &a_otherObject);
 	};

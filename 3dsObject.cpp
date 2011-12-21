@@ -16,10 +16,11 @@ namespace ns_3ds
 		cf_indexCount=0;
 		cf_texList=NULL;
 		cf_texCount=0;
-		cf_vertexBuffer=NULL;
-		cf_vertexVBO=0;
+		/*cf_vertexBuffer=NULL;
+		cf_vertexVBO=0;*/
 		cf_sphereRadius=0;
 		cf_occluderBuffer=NULL;
+		cf_buffered=false;
 	}
 
 	c3dsObject::~c3dsObject()
@@ -148,60 +149,85 @@ namespace ns_3ds
 			cm_RecalcFrustum(1.0);
 			cm_RecalcOccluder(1.0);
 		}
-		if (!cf_vertexBuffer)
+		if (!cf_buffered)
 		{
-			cf_vertexBuffer=new sVertexNormalTex [3*cf_indexCount];
-			for(int i=0;i<cf_indexCount;i++) // read indexes
+			for (stdext::hash_map<std::string, std::vector<tChunkID> *>::iterator _it=cf_faceMaterial.begin(); _it!=cf_faceMaterial.end(); ++_it)
 			{
+				std::vector<tChunkID> *_faceList=_it->second;
+				tChunkID _faceCount=_faceList->size();
+				sVertexNormalTex *_temp=new sVertexNormalTex [3*3*_faceCount];
 				tFloat _zeros[3]={0.0f, 0.0f, 0.0f};
-				// чтение индексов и сохранение вершин
-				for (int j=0; j<3; j++)
+				int _currVertex=0;
+				for(int i=0; i<_faceCount; i++) // faces
 				{
-					int _num=3*i+j;
-					cf_vertexBuffer[_num].SetCoord(&cf_verticesList[3*cf_indexList[_num]]);
-					if (cf_texList)
+					int _face=3*(*_faceList)[i];
+					int _tempCurrVertex=_currVertex;
+					for (int j=0; j<3; j++) // indexes
 					{
-						cf_vertexBuffer[_num].SetTex(&cf_texList[2*cf_indexList[_num]]);
-					} else
-					{
-						cf_vertexBuffer[_num].SetTex(_zeros);
+						int _vertexNum=cf_indexList[_face+j];
+						_temp[_currVertex].SetCoord(&cf_verticesList[3*_vertexNum]);
+						if (cf_texList)
+						{
+							_temp[_currVertex].SetTex(&cf_texList[2*_vertexNum]);
+						} else
+						{
+							_temp[_currVertex].SetTex(_zeros);
+						}
+						_currVertex++;
 					}
+					// вычисление нормали
+					vec3 a0=_temp[_tempCurrVertex].Vec3Coordinate();
+					vec3 a1=_temp[_tempCurrVertex+1].Vec3Coordinate();
+					vec3 a2=_temp[_tempCurrVertex+2].Vec3Coordinate();
+					vec3 a1a0=a0-a1,a1a2=a2-a1;
+					vec3 normal=normalize(cross(a1a2,a1a0));
+					// сохранение нормали для 3 точек полигона
+					_temp[_tempCurrVertex].SetNormal(&normal.x);
+					_temp[_tempCurrVertex+1].SetNormal(&normal.x);
+					_temp[_tempCurrVertex+2].SetNormal(&normal.x);
 				}
-				// вычисление нормали
-				vec3 a0=cf_vertexBuffer[3*i].Vec3Coordinate();
-				vec3 a1=cf_vertexBuffer[3*i+1].Vec3Coordinate();
-				vec3 a2=cf_vertexBuffer[3*i+2].Vec3Coordinate();
-				vec3 a1a0=a0-a1,a1a2=a2-a1;
-				vec3 normal=normalize(cross(a1a2,a1a0));
-				// сохранение нормали для 3 точек полигона
-				cf_vertexBuffer[3*i].SetNormal(&normal.x);
-				cf_vertexBuffer[3*i+1].SetNormal(&normal.x);
-				cf_vertexBuffer[3*i+2].SetNormal(&normal.x);
+				cf_vertexBuffer[_it->first]=_temp;
 			}
 
 			if (!c3ds::hasVBO) { return false; } // no VBO
 			if (c3ds::newOGL) // OGL>=1.5
 			{
-				// генерация имени для буферного объекта
-				glGenBuffers(1, &cf_vertexVBO);
-				// привязка буфера
-				glBindBuffer(GL_ARRAY_BUFFER, cf_vertexVBO);
-				// создание и инициализация области хранения данных для буферного объекта
-				glBufferData(GL_ARRAY_BUFFER, cf_indexCount*3*sizeof(sVertexNormalTex), cf_vertexBuffer, GL_STATIC_DRAW);
-				// отключение буфера
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				for (stdext::hash_map<std::string, sVertexNormalTex *>::iterator _it=cf_vertexBuffer.begin(); _it!=cf_vertexBuffer.end(); ++_it)
+				{
+					tUint _vertexVBO=0;
+					// число вертексов
+					int _vertexCount=3*3*cf_faceMaterial[_it->first]->size();
+					// генерация имени для буферного объекта
+					glGenBuffers(1, &_vertexVBO);
+					// привязка буфера
+					glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
+					// создание и инициализация области хранения данных для буферного объекта
+					glBufferData(GL_ARRAY_BUFFER, _vertexCount*sizeof(sVertexNormalTex), _it->second, GL_STATIC_DRAW);
+					// отключение буфера
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+					// занесение номера буфера в hash_map
+					cf_vertexVBO[_it->first]=_vertexVBO;
+				}
 				_retVal=true;
 			}
 			else // old OGL
 			{
-				// генерация имени для буферного объекта
-				glGenBuffersARB(1, &cf_vertexVBO);
-				// привязка буфера
-				glBindBufferARB(GL_ARRAY_BUFFER_ARB, cf_vertexVBO);
-				// создание и инициализация области хранения данных для буферного объекта
-				glBufferDataARB(GL_ARRAY_BUFFER_ARB, cf_indexCount*3*sizeof(sVertexNormalTex), cf_vertexBuffer, GL_STATIC_DRAW);
-				// отключение буфера
-				glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+				for (stdext::hash_map<std::string, sVertexNormalTex *>::iterator _it=cf_vertexBuffer.begin(); _it!=cf_vertexBuffer.end(); ++_it)
+				{
+					tUint _vertexVBO=0;
+					// число вертексов
+					int _vertexCount=3*3*cf_faceMaterial[_it->first]->size();
+					// генерация имени для буферного объекта
+					glGenBuffersARB(1, &_vertexVBO);
+					// привязка буфера
+					glBindBufferARB(GL_ARRAY_BUFFER_ARB, _vertexVBO);
+					// создание и инициализация области хранения данных для буферного объекта
+					glBufferDataARB(GL_ARRAY_BUFFER_ARB, _vertexCount*sizeof(sVertexNormalTex), _it->second, GL_STATIC_DRAW);
+					// отключение буфера
+					glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+					// занесение номера буфера в hash_map
+					cf_vertexVBO[_it->first]=_vertexVBO;
+				}
 				_retVal=true;
 			}
 		}
@@ -214,9 +240,9 @@ namespace ns_3ds
 		if (!cf_hidden)
 		{
 			glPushMatrix(); // save current matrix
-			//// применение матрицы поворота
+			// применение матрицы поворота
 			glMultMatrixf(a_3ds->cf_scaleMatrix);
-			//// установка цвета
+			// установка цвета
 			//glColor3f(position.color[0],position.color[1],position.color[2]);
 			if (c3ds::hasVBO) // has VBO
 			{
@@ -228,34 +254,33 @@ namespace ns_3ds
 					glEnableClientState(GL_NORMAL_ARRAY);
 					//glPushMatrix(); // save current matrix
 					//glMultMatrixf(localMatrix[i]);
-					// привязка буфера
-					glBindBuffer(GL_ARRAY_BUFFER, cf_vertexVBO);
-					// установка указателя на массив вершин по VBO
-					glVertexPointer(3, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_coordinate-(char *)cf_vertexBuffer));
-					// установка указателя на массив нормалей по VBO
-					glNormalPointer(GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_normal-(char *)cf_vertexBuffer));
-				
-					// включение массива текстурных координат
-					glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-					// привязка текстуры
-					//tex->bind();
-					if (cf_faceMaterial.size()>0)
+					for (stdext::hash_map<std::string, tUint>::iterator _it=cf_vertexVBO.begin(); _it!=cf_vertexVBO.end(); ++_it)
 					{
-						std::string _materialName=cf_faceMaterial.begin()->first;
-						c3dsMaterial *_material=a_3ds->cf_material.at(_materialName);
+						sVertexNormalTex *_vertexBuffer=cf_vertexBuffer[_it->first];
+						int _indexCount=3*cf_faceMaterial[_it->first]->size();
+						// привязка буфера
+						glBindBuffer(GL_ARRAY_BUFFER, _it->second);
+						// установка указателя на массив вершин по VBO
+						glVertexPointer(3, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)_vertexBuffer[0].sf_coordinate-(char *)_vertexBuffer));
+						// установка указателя на массив нормалей по VBO
+						glNormalPointer(GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)_vertexBuffer[0].sf_normal-(char *)_vertexBuffer));
+						// включение массива текстурных координат
+						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+						// получение материала
+						c3dsMaterial *_material=a_3ds->cf_material[_it->first];
 						if (_material)
 						{
 							_material->cm_Use();
 						}
+						// установка указателя на массив текстурных координат по VBO
+						//GLvoid * tmpK=(GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]);
+						glTexCoordPointer(2, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)_vertexBuffer[0].sf_tex-(char *)_vertexBuffer));
+						// отрисовка вершин
+						glDrawArrays(GL_TRIANGLES, 0, 3*_indexCount);
+						glDisable(GL_TEXTURE_2D);
+						// отключение массива текстурных координат
+						glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 					}
-					// установка указателя на массив текстурных координат по VBO
-					//GLvoid * tmpK=(GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]);
-					glTexCoordPointer(2, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_tex-(char *)cf_vertexBuffer));
-					// отрисовка вершин
-					glDrawArrays(GL_TRIANGLES, 0, 3*cf_indexCount);
-					glDisable(GL_TEXTURE_2D);
-					// отключение массива текстурных координат
-					glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 					// отключение массива вершин
 					glDisableClientState(GL_VERTEX_ARRAY);
 					// отключение массива нормалей
@@ -274,14 +299,33 @@ namespace ns_3ds
 					glEnableClientState(GL_NORMAL_ARRAY);
 					//glPushMatrix(); // save current matrix
 					//glMultMatrixf(localMatrix[i]);
-					// привязка буфера
-					glBindBufferARB(GL_ARRAY_BUFFER_ARB, cf_vertexVBO);
-					// установка указателя на массив вершин по VBO
-					glVertexPointer(3, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_coordinate-(char *)cf_vertexBuffer));
-					// установка указателя на массив нормалей по VBO
-					glNormalPointer(GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)cf_vertexBuffer[0].sf_normal-(char *)cf_vertexBuffer));
-					// отрисовка вершин
-					glDrawArrays(GL_TRIANGLES, 0, 3*cf_indexCount);
+					for (stdext::hash_map<std::string, tUint>::iterator _it=cf_vertexVBO.begin(); _it!=cf_vertexVBO.end(); ++_it)
+					{
+						sVertexNormalTex *_vertexBuffer=cf_vertexBuffer[_it->first];
+						int _indexCount=3*cf_faceMaterial[_it->first]->size();
+						// привязка буфера
+						glBindBufferARB(GL_ARRAY_BUFFER, _it->second);
+						// установка указателя на массив вершин по VBO
+						glVertexPointer(3, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)_vertexBuffer[0].sf_coordinate-(char *)_vertexBuffer));
+						// установка указателя на массив нормалей по VBO
+						glNormalPointer(GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)_vertexBuffer[0].sf_normal-(char *)_vertexBuffer));
+						// включение массива текстурных координат
+						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+						// получение материала
+						c3dsMaterial *_material=a_3ds->cf_material[_it->first];
+						if (_material)
+						{
+							_material->cm_Use();
+						}
+						// установка указателя на массив текстурных координат по VBO
+						//GLvoid * tmpK=(GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]);
+						glTexCoordPointer(2, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)_vertexBuffer[0].sf_tex-(char *)_vertexBuffer));
+						// отрисовка вершин
+						glDrawArrays(GL_TRIANGLES, 0, 3*_indexCount);
+						glDisable(GL_TEXTURE_2D);
+						// отключение массива текстурных координат
+						glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+					}
 					// отключение массива вершин
 					glDisableClientState(GL_VERTEX_ARRAY);
 					// отключение массива нормалей
@@ -299,9 +343,31 @@ namespace ns_3ds
 				//glMultMatrixf(localMatrix[j]);
 				glEnableClientState(GL_VERTEX_ARRAY);
 				glEnableClientState(GL_NORMAL_ARRAY);
-				glVertexPointer(3, GL_FLOAT, sizeof(sVertexNormalTex), cf_vertexBuffer[0].sf_coordinate);
-				glNormalPointer(GL_FLOAT, sizeof(sVertexNormalTex), cf_vertexBuffer[0].sf_normal);
-				glDrawArrays(GL_TRIANGLES, 0, 3*cf_indexCount);
+				for (stdext::hash_map<std::string, sVertexNormalTex *>::iterator _it=cf_vertexBuffer.begin(); _it!=cf_vertexBuffer.end(); ++_it)
+				{
+					sVertexNormalTex *_vertexBuffer=cf_vertexBuffer[_it->first];
+					int _indexCount=3*cf_faceMaterial[_it->first]->size();
+					// установка указателя на массив вершин
+					glVertexPointer(3, GL_FLOAT, sizeof(sVertexNormalTex), _vertexBuffer[0].sf_coordinate);
+					// установка указателя на массив нормалей
+					glNormalPointer(GL_FLOAT, sizeof(sVertexNormalTex), _vertexBuffer[0].sf_normal);
+					// включение массива текстурных координат
+					glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+					// получение материала
+					c3dsMaterial *_material=a_3ds->cf_material[_it->first];
+					if (_material)
+					{
+						_material->cm_Use();
+					}
+					// установка указателя на массив текстурных координат по VBO
+					//GLvoid * tmpK=(GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]);
+					glTexCoordPointer(2, GL_FLOAT, sizeof(sVertexNormalTex), _vertexBuffer[0].sf_tex);
+					// отрисовка вершин
+					glDrawArrays(GL_TRIANGLES, 0, 3*_indexCount);
+					glDisable(GL_TEXTURE_2D);
+					// отключение массива текстурных координат
+					glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+				}
 				glDisableClientState(GL_VERTEX_ARRAY);
 				glDisableClientState(GL_NORMAL_ARRAY);
 				_retVal=true;

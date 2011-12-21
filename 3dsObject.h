@@ -26,6 +26,8 @@ namespace ns_3ds
 		bool cf_matte;
 		// требует внешней обработки?!
 		bool cf_externalProcessed;
+		// флаг буферизованности
+		bool cf_buffered;
 		// список координат вертексов
 		tFloat *cf_verticesList;
 		// число вертексов
@@ -41,9 +43,9 @@ namespace ns_3ds
 		// число вертексов
 		tChunkID cf_texCount;
 		// буфер VBO
-		tUint cf_vertexVBO;
+		stdext::hash_map<std::string, tUint> cf_vertexVBO;
 		// буферизованные данные
-		sVertexNormalTex *cf_vertexBuffer;
+		stdext::hash_map<std::string, sVertexNormalTex *> cf_vertexBuffer;
 		// frustum occluder
 		glm::vec3 cf_sphere;
 		tFloat cf_sphereRadius;

@@ -222,6 +222,15 @@ namespace ns_3ds
 	{
 	}
 
+	void c3dsCamera::cm_normalizePlane(int i)
+	{
+		tDouble _mag=glm::sqrt(cf_frustum[i].x*cf_frustum[i].x+cf_frustum[i].y*cf_frustum[i].y+cf_frustum[i].z*cf_frustum[i].z);
+		cf_frustum[i].x/=_mag;
+		cf_frustum[i].y/=_mag;
+		cf_frustum[i].z/=_mag;
+		cf_frustum[i].w/=_mag;
+	}
+
 	void c3dsCamera::cm_UpdateFrustum()
 	{
 		float _temp[16];
@@ -251,52 +260,81 @@ namespace ns_3ds
 		glm::mat4x4 _muliplied=_projection*_modelview;
  
 		/* Находим A, B, C, D для ПРАВОЙ плоскости */
+		/*cf_frustum[0].x = _muliplied[3][0]-_muliplied[0][0];
+		cf_frustum[0].y = _muliplied[3][1]-_muliplied[0][1];
+		cf_frustum[0].z = _muliplied[3][2]-_muliplied[0][2];
+		cf_frustum[0].w = _muliplied[3][3]-_muliplied[0][3];*/
 		cf_frustum[0].x = _muliplied[0][3]-_muliplied[0][0];
 		cf_frustum[0].y = _muliplied[1][3]-_muliplied[1][0];
 		cf_frustum[0].z = _muliplied[2][3]-_muliplied[2][0];
 		cf_frustum[0].w = _muliplied[3][3]-_muliplied[3][0];
 		/* Приводим уравнение плоскости к нормальному виду */
-		cf_frustum[0]=glm::normalize(cf_frustum[0]);
+		cm_normalizePlane(0);
  
 		/* Находим A, B, C, D для ЛЕВОЙ плоскости */
+		/*cf_frustum[1].x = _muliplied[3][0]+_muliplied[0][0];
+		cf_frustum[1].y = _muliplied[3][1]+_muliplied[0][1];
+		cf_frustum[1].z = _muliplied[3][2]+_muliplied[0][2];
+		cf_frustum[1].w = _muliplied[3][3]+_muliplied[0][3];*/
 		cf_frustum[1].x = _muliplied[0][3]+_muliplied[0][0];
 		cf_frustum[1].y = _muliplied[1][3]+_muliplied[1][0];
 		cf_frustum[1].z = _muliplied[2][3]+_muliplied[2][0];
 		cf_frustum[1].w = _muliplied[3][3]+_muliplied[3][0];
 		/* Приводим уравнение плоскости к нормальному виду */
-		cf_frustum[1]=glm::normalize(cf_frustum[1]);
+		cm_normalizePlane(1);
  
 		/* Находим A, B, C, D для НИЖНЕЙ плоскости */
+		/*cf_frustum[2].x = _muliplied[3][0]+_muliplied[1][0];
+		cf_frustum[2].y = _muliplied[3][1]+_muliplied[1][1];
+		cf_frustum[2].z = _muliplied[3][2]+_muliplied[1][2];
+		cf_frustum[2].w = _muliplied[3][3]+_muliplied[1][3];*/
 		cf_frustum[2].x = _muliplied[0][3]+_muliplied[0][1];
 		cf_frustum[2].y = _muliplied[1][3]+_muliplied[1][1];
 		cf_frustum[2].z = _muliplied[2][3]+_muliplied[2][1];
 		cf_frustum[2].w = _muliplied[3][3]+_muliplied[3][1];
 		/* Приводим уравнение плоскости к нормальному */
-		cf_frustum[2]=glm::normalize(cf_frustum[2]);
+		cm_normalizePlane(2);
  
 		/* ВЕРХНЯЯ плоскость */
+		/*cf_frustum[3].x = _muliplied[3][0]-_muliplied[1][0];
+		cf_frustum[3].y = _muliplied[3][1]-_muliplied[1][1];
+		cf_frustum[3].z = _muliplied[3][2]-_muliplied[1][2];
+		cf_frustum[3].w = _muliplied[3][3]-_muliplied[1][3];*/
 		cf_frustum[3].x = _muliplied[0][3]-_muliplied[0][1];
 		cf_frustum[3].y = _muliplied[1][3]-_muliplied[1][1];
 		cf_frustum[3].z = _muliplied[2][3]-_muliplied[2][1];
 		cf_frustum[3].w = _muliplied[3][3]-_muliplied[3][1];
 		/* Приводим уравнение плоскости к нормальному */
-		cf_frustum[3]=glm::normalize(cf_frustum[3]);
+		cm_normalizePlane(3);
  
 		/* ЗАДНЯЯ плоскость */
+		/*cf_frustum[4].x = _muliplied[3][0]-_muliplied[2][0];
+		cf_frustum[4].y = _muliplied[3][1]-_muliplied[2][1];
+		cf_frustum[4].z = _muliplied[3][2]-_muliplied[2][2];
+		cf_frustum[4].w = _muliplied[3][3]-_muliplied[2][3];*/
 		cf_frustum[4].x = _muliplied[0][3]-_muliplied[0][2];
 		cf_frustum[4].y = _muliplied[1][3]-_muliplied[1][2];
 		cf_frustum[4].z = _muliplied[2][3]-_muliplied[2][2];
 		cf_frustum[4].w = _muliplied[3][3]-_muliplied[3][2];
 		/* Приводим уравнение плоскости к нормальному */
-		cf_frustum[4]=glm::normalize(cf_frustum[4]);
+		cm_normalizePlane(4);
   
 		/* ПЕРЕДНЯЯ плоскость */
+		/*cf_frustum[5].x = _muliplied[3][0]+_muliplied[2][0];
+		cf_frustum[5].y = _muliplied[3][1]+_muliplied[2][1];
+		cf_frustum[5].z = _muliplied[3][2]+_muliplied[2][2];
+		cf_frustum[5].w = _muliplied[3][3]+_muliplied[2][3];*/
 		cf_frustum[5].x = _muliplied[0][3]+_muliplied[0][2];
 		cf_frustum[5].y = _muliplied[1][3]+_muliplied[1][2];
 		cf_frustum[5].z = _muliplied[2][3]+_muliplied[2][2];
 		cf_frustum[5].w = _muliplied[3][3]+_muliplied[3][2];
 		/* Приводим уравнение плоскости к нормальному */
-		cf_frustum[5]=glm::normalize(cf_frustum[5]);
+		cm_normalizePlane(5);
+	}
+
+	tDouble c3dsCamera::cm_Distance(vec3 a_point)
+	{
+		return glm::length(cf_position[cf_current]-a_point);
 	}
 
 	tFrustum * c3dsCamera::GetFrustum()

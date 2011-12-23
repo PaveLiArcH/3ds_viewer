@@ -27,6 +27,7 @@ namespace ns_3ds
 		void updateOrientationMatrix();
 		// коэффициенты для Frustum Culling
 		tFrustum cf_frustum;
+		void cm_normalizePlane(int i);
 	public:
 		// Конструктор по умолчанию. Задает стандартное положение камеры.
 		c3dsCamera();
@@ -62,6 +63,8 @@ namespace ns_3ds
 		void cm_UpdateFrustum();
 		// получение коэффициентов
 		tFrustum * GetFrustum();
+		// расчет расстояния от объекта до наблюдателя
+		tDouble c3dsCamera::cm_Distance(vec3 a_point);
 	};
 }
 

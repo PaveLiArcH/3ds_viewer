@@ -32,5 +32,6 @@ extern int _total_frustumed;
 extern int _total_occluded;
 
 extern int texturingEnabled;
+extern int _total_drawed;
 
 #endif

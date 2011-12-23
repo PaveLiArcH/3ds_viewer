@@ -11,6 +11,21 @@
 namespace ns_3ds
 {
 	class c3ds;
+	class c3dsMaterial;
+
+	struct s3dsObjectPieceBuffered
+	{
+		c3dsMaterial *sf_material;
+		sVertexNormalTex *sf_buffer;
+		long long sf_count;
+	};
+
+	struct s3dsObjectPieceBufferedVBO
+	{
+		c3dsMaterial *sf_material;
+		tUint sf_buffer;
+		long long sf_count;
+	};
 
 	class c3dsObject
 	{
@@ -43,9 +58,12 @@ namespace ns_3ds
 		// число вертексов
 		tChunkID cf_texCount;
 		// буфер VBO
-		stdext::hash_map<std::string, tUint> cf_vertexVBO;
+		//stdext::hash_map<std::string, tUint> cf_vertexVBO;
+		s3dsObjectPieceBufferedVBO *cf_vertexVBO;
 		// буферизованные данные
-		stdext::hash_map<std::string, sVertexNormalTex *> cf_vertexBuffer;
+		//stdext::hash_map<std::string, sVertexNormalTex *> cf_vertexBuffer;
+		s3dsObjectPieceBuffered *cf_vertexBuffer;
+		tUint cf_vertexBufferedCount;
 		// frustum occluder
 		glm::vec3 cf_sphere;
 		tFloat cf_sphereRadius;
@@ -92,5 +110,6 @@ namespace ns_3ds
 }
 
 #include "3ds.h"
+#include "3dsMaterial.h"
 
 #endif

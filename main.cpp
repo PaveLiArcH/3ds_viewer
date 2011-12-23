@@ -29,10 +29,12 @@ std::ofstream _cerr;
 // переменная для чтения пути к модели
 std::wstring _3dsFile;
 
-int _total_frustumed=0, _total_occluded=0,frame=0,_time,timebase=0,w,h,delayPerFrames=20,filterMode=0,texturingEnabled=0;
+int _total_frustumed=0, _total_occluded=0,frame=0,_time,timebase=0,w,h,delayPerFrames=20,filterMode=0,texturingEnabled=0,_total_drawed=0;
+int _oldW=600, _oldH=600, _oldX=200, _oldY=200,_frames_drawed=0;
 std::string _str;
 double _lastFps=0;
-bool isDrawingFps=true, isDrawingBack=true;
+bool isDrawingFps=true, isDrawingBack=true, isFullScreen=false, isDirty=true;
+bool _overlaySupport=false;
 
 GLfloat *surfaceIndexPoint,*surfaceNormal;
 sVertexColor axes[]={
@@ -142,7 +144,7 @@ void drawFps()
 	}
 	std::ostringstream _stream;
 	_stream.precision(3);
-	_stream<<"FPS: "<<_lastFps<<" frustumed: "<<_total_frustumed<<" occluded:"<<_total_occluded;
+	_stream<<"FPS: "<<_lastFps<<" frustumed: "<<_total_frustumed<<" occluded: "<<_total_occluded<<" drawed: "<<_total_drawed;
 	_str=_stream.str();
 	glPushMatrix();
 	glLoadIdentity();
@@ -161,6 +163,8 @@ void display (void)
 {
 	_total_frustumed=0;
 	_total_occluded=0;
+	_total_drawed=0;
+	_frames_drawed++;
 	// отчищаем буфер цвета и буфер глубины
 	int rst=glGetError();
 
@@ -212,19 +216,23 @@ void display (void)
 	shader::disactivate();
 
 	glCullFace(GL_BACK);
-	
-	if (isDrawingFps)
-	{
-		drawFps();
-	}
 
 	// смена переднего и заднего буферов
 	glutSwapBuffers();
 };
 
+void displayOverlay(void)
+{
+	if (isDrawingFps)
+	{
+		drawFps();
+	}
+}
+
 // функция, вызываемая при изменении размеров окна
 void reshape (int w, int h)
 {
+	isDirty=true;
 	::w=w; ::h=h;
 	// установить новую область просмотра, равную всей области окна
 	glViewport(0,0,(GLsizei)w, (GLsizei)h);
@@ -251,16 +259,35 @@ void simulation(int)
 void onIdle()
 {
 	// принудительно перерисовать окно
-	glutPostRedisplay();
+	int _layerDamaged=glutLayerGet(GLUT_NORMAL_DAMAGED);
+	int _overlayDamaged=glutLayerGet(GLUT_OVERLAY_DAMAGED);
+	if (isDirty||(_frames_drawed<8)||(_layerDamaged==GL_TRUE)||(_overlayDamaged==GL_TRUE))
+	{
+		if (isDirty)
+		{
+			_frames_drawed=0;
+		}
+		isDirty=false;
+		glutPostRedisplay();
+	} else
+	{
+		glutSwapBuffers();
+	}
+	if (isDrawingFps)
+	{
+		//drawFps();
+	}
 };
 
 // обработчик нажатия обычных клавиш
 void processNormalKeys(unsigned char key, int x, int y)
 {
+	isDirty=true;
 	// получение клавиатурной раскладки заданного потока
 	HKL kbLayout=GetKeyboardLayout(0); // 0 - активный поток
 	// преобразование ASCII-символа в VK-сканкод по заданной раскладке
 	int vkKey=VkKeyScanExA(key,kbLayout);
+	int _modifiers=glutGetModifiers();
 	// отсечение состояний клавиш, выполнение действий в соответствии с нажатием
 	switch(vkKey&0xff) // 0xff - для работы только с младшим байтом, т.к. в старшем будет состояние SHIFT, CTRL, ALT, Hankaku и др.
 	{
@@ -316,6 +343,25 @@ void processNormalKeys(unsigned char key, int x, int y)
 			isDrawingBack=!isDrawingBack;
 			break;
 		}
+		case VK_RETURN:
+		{
+			if (_modifiers&GLUT_ACTIVE_ALT)
+			{
+				isFullScreen=!isFullScreen;
+				if(isFullScreen)
+				{
+					_oldX=glutGet(GLUT_WINDOW_X);
+					_oldY=glutGet(GLUT_WINDOW_Y);
+					_oldW=glutGet(GLUT_WINDOW_WIDTH);
+					_oldH=glutGet(GLUT_WINDOW_HEIGHT);
+					glutFullScreen();
+				} else
+				{
+					glutPositionWindow(_oldX,_oldY);
+					glutReshapeWindow(_oldW,_oldH);
+				}
+			}
+		}
 	}
 	switch(key)
 	{
@@ -347,6 +393,7 @@ void processNormalKeys(unsigned char key, int x, int y)
 // обработчик нажатия функциональных клавиш
 void processSpecialKeys(int key, int x, int y)
 {
+	isDirty=true;
 	int _modifiers=glutGetModifiers();
 	switch(key)
 	{
@@ -357,6 +404,7 @@ void processSpecialKeys(int key, int x, int y)
 			if (_modifiers & GLUT_ACTIVE_CTRL)
 			{
 				object->cm_DownScale();
+				object->cm_GetCamera()->applyCamera();
 			} else
 			{
 				delayPerFrames=delayPerFrames<100?delayPerFrames+5:delayPerFrames;
@@ -368,6 +416,7 @@ void processSpecialKeys(int key, int x, int y)
 			if (_modifiers & GLUT_ACTIVE_CTRL)
 			{
 				object->cm_UpScale();
+				object->cm_GetCamera()->applyCamera();
 			} else
 			{
 				delayPerFrames=delayPerFrames>5?delayPerFrames-5:delayPerFrames;
@@ -548,8 +597,14 @@ void wmain (int argc, wchar_t **argv)
 	modelShader.loadFragmentShader("Phong.fsh");
 	modelShader.createProgram();
 
+	_overlaySupport=glutLayerGet(GLUT_OVERLAY_POSSIBLE)==GL_TRUE;
+
 	// 4. устанавливаем функцию, которая будет вызываться для перерисовки окна
 	glutDisplayFunc(display);
+	if (_overlaySupport)
+	{
+		glutOverlayDisplayFunc(displayOverlay);
+	}
 	// 5. устанавливаем функцию, которая будет вызываться при изменении размеров окна
 	glutReshapeFunc(reshape);
 	//// 6. устанавливаем таймер для перерисовки окна по времени

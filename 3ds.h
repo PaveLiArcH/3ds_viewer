@@ -50,7 +50,7 @@ namespace ns_3ds
 		tFloat cf_scaleMatrix[16];
 		// объекты
 		vector<c3dsObject *> cf_object;
-		static bool newOGL, hasVBO, hasQueries;
+		static bool newOGL, hasVBO, hasQueries, hasNVConditional;
 		// инициализация
 		void init();
 		c3dsCamera cf_camera;

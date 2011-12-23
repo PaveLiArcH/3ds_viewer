@@ -53,6 +53,9 @@ namespace ns_3ds
 		// OC occluder
 		sVertex *cf_occluderBuffer;
 		tUint cf_occluderVBO;
+		tUint cf_queryId;
+		tUint cf_recheckTimer;
+		bool cf_wasVisible;
 		// occluder common data
 		tFloat cf_minX,cf_maxX,cf_minY,cf_maxY,cf_minZ,cf_maxZ;
 	public:

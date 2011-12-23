@@ -12,12 +12,14 @@ namespace ns_3ds
 	bool c3ds::newOGL=false;
 	bool c3ds::hasVBO=false;
 	bool c3ds::hasQueries=false;
+	bool c3ds::hasNVConditional=false;
 
 	void c3ds::checkExtensions()
 	{
 		c3ds::newOGL=(atof((const char *)glGetString(GL_VERSION))>=1.5f); // check OGL version
 		c3ds::hasVBO=glutExtensionSupported("GL_ARB_vertex_buffer_object")!=0; // check if VBO supported
 		c3ds::hasQueries=glutExtensionSupported("GL_ARB_occlusion_query")!=0;
+		c3ds::hasNVConditional=glutExtensionSupported("NV_conditional_render")!=0;
 	}
 
 	// буферизация данных объекта в VBO

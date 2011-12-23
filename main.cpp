@@ -29,10 +29,10 @@ std::ofstream _cerr;
 // переменная для чтения пути к модели
 std::wstring _3dsFile;
 
-int _total_frustumed=0,frame=0,_time,timebase=0,w,h,delayPerFrames=20,filterMode=0;
+int _total_frustumed=0, _total_occluded=0,frame=0,_time,timebase=0,w,h,delayPerFrames=20,filterMode=0,texturingEnabled=0;
 std::string _str;
 double _lastFps=0;
-bool isDrawingFps=true, isDrawingBack=false;
+bool isDrawingFps=true, isDrawingBack=true;
 
 GLfloat *surfaceIndexPoint,*surfaceNormal;
 sVertexColor axes[]={
@@ -142,7 +142,7 @@ void drawFps()
 	}
 	std::ostringstream _stream;
 	_stream.precision(3);
-	_stream<<"FPS: "<<_lastFps<<" frustumed: "<<_total_frustumed;
+	_stream<<"FPS: "<<_lastFps<<" frustumed: "<<_total_frustumed<<" occluded:"<<_total_occluded;
 	_str=_stream.str();
 	glPushMatrix();
 	glLoadIdentity();
@@ -160,6 +160,7 @@ void drawFps()
 void display (void)
 {
 	_total_frustumed=0;
+	_total_occluded=0;
 	// отчищаем буфер цвета и буфер глубины
 	int rst=glGetError();
 
@@ -194,9 +195,17 @@ void display (void)
 	glMultMatrixd(object->cm_GetCamera()->getPosition());
 
 	firstLight.use();
-	secondLight.use(GL_LIGHT1);
+	//secondLight.use(GL_LIGHT1);
 
-	modelShader.activate();
+	bool shaderOk=modelShader.activate();
+
+	if (shaderOk)
+	{
+		texturingEnabled=glGetUniformLocation(modelShader.getProgramId(),"texturingEnabled");
+	} else
+	{
+		texturingEnabled=0;
+	}
 
 	object->render(filterMode); // call to c3ds method for rendering
 
@@ -552,7 +561,7 @@ void wmain (int argc, wchar_t **argv)
 	// 8. устанавливаем обработчик функциональных клавиш
 	glutSpecialFunc(processSpecialKeys);
 
-	glEnable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHT1);

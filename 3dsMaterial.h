@@ -1,6 +1,7 @@
 #ifndef __3dsMaterial_h__
 #define __3dsMaterial_h__
 
+#include "stdafx.h"
 #include <string>
 #include "3dsTypes.h"
 

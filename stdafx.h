@@ -29,5 +29,8 @@ using namespace std;
 #pragma endregion Определение значений
 
 extern int _total_frustumed;
+extern int _total_occluded;
+
+extern int texturingEnabled;
 
 #endif

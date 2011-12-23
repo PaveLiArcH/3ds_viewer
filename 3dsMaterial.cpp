@@ -143,9 +143,19 @@ namespace ns_3ds
 			glMaterialfv(a_face,GL_SHININESS,&_shininess);
 			if (cf_textureMap)
 			{
+				if (texturingEnabled>0)
+				{
+					glUniform1i(texturingEnabled, 1);
+				}
 				glEnable(GL_TEXTURE_2D);
 				glClientActiveTexture(GL_TEXTURE0);
 				cf_textureMap->bind();
+			} else
+			{
+				if (texturingEnabled>0)
+				{
+					glUniform1i(texturingEnabled, 0);
+				}
 			}
 			return true;
 		}

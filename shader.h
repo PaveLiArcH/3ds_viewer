@@ -5,7 +5,6 @@
 #include "glut.h"
 #include <string>
 #include <vector>
-#include "vertex.h"
 
 using namespace std;
 

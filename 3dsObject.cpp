@@ -131,6 +131,7 @@ namespace ns_3ds
 	bool c3dsObject::cm_Buffer(c3ds *a_3ds)
 	{
 		bool _retVal=false;
+		cf_hidden=cf_verticesCount==0;
 		if (cf_verticesCount>0)
 		{
 			cf_minX=cf_verticesList[0];
@@ -249,6 +250,138 @@ namespace ns_3ds
 		return _retVal;
 	}
 
+	int c3dsObject::cm_OcclusionTest(c3ds *a_3ds)
+	{
+		int _draw=0;
+		if (!cf_hidden)
+		{
+			tUint _query=0;
+			if (cf_wasVisible&&(cf_recheckTimer>0))
+			{
+				if (cf_queryId!=0)
+				{
+					glDeleteQueries(1, &cf_queryId);
+					cf_queryId=0;
+				}
+				cf_recheckTimer--;
+				_draw=1;
+			} else
+			{
+				if (cf_wasVisible)
+				{
+					if (cf_queryId!=0)
+					{
+						glDeleteQueries(1, &cf_queryId);
+						cf_queryId=0;
+					}
+					cf_wasVisible=false;
+				}
+				glGenQueries(1, &_query);
+				glDepthMask(GL_FALSE);
+				glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+				// включение массива вершин
+				glEnableClientState(GL_VERTEX_ARRAY);
+				glBindBuffer(GL_ARRAY_BUFFER, cf_occluderVBO);
+				sVertex _temp;
+				glVertexPointer(3, GL_FLOAT, sizeof(sVertex), (GLvoid *)((char *)&_temp.sf_coordinate-(char *)&_temp));
+				glBeginQuery(GL_SAMPLES_PASSED, _query);
+				{
+					glDrawArrays(GL_QUADS, 0, 24);
+				}
+				glEndQuery(GL_SAMPLES_PASSED);
+				glDisableClientState(GL_VERTEX_ARRAY);
+				// отключение буфера
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glDepthMask(GL_TRUE);
+				glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+				if (cf_queryId>0)
+				{
+					tUint _resultReady=GL_FALSE;
+					/*while ((_resultReady==GL_FALSE)&&(_error==GL_NO_ERROR))
+					{
+						glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT_AVAILABLE, &_resultReady);
+						_error=glGetError();
+					}*/
+					glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT_AVAILABLE, &_resultReady);
+					if(_resultReady!=GL_FALSE)
+					{
+						int _numBitsQuery;
+						glGetQueryiv(GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, &_numBitsQuery);
+						switch(_numBitsQuery)
+						{
+						case 8:
+						case 16:
+						case 32:
+							tUint _result;
+							glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT, &_result);
+							_draw=_result;
+							if (_draw==0)
+							{
+								_total_occluded++;
+							}
+							cf_wasVisible=_draw;
+							cf_recheckTimer=10;
+							break;
+						case 64:
+						default:
+							_draw=1;
+						}
+						glDeleteQueries(1, &cf_queryId);
+						cf_queryId=_query;
+					} else
+					{
+						_draw=-1;
+						cf_newQueryId=_query;
+					}
+				} else
+				{
+					_draw=1;
+					cf_queryId=_query;
+				}
+			}
+		}
+		return _draw;
+	}
+
+	bool c3dsObject::cm_OcclusionRecheck()
+	{
+		bool _retVal=false;
+		tUint _resultReady=GL_FALSE;
+		glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT_AVAILABLE, &_resultReady);
+		if(_resultReady!=GL_FALSE)
+		{
+			int _numBitsQuery;
+			glGetQueryiv(GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, &_numBitsQuery);
+			switch(_numBitsQuery)
+			{
+			case 8:
+			case 16:
+			case 32:
+				tUint _result;
+				glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT, &_result);
+				_retVal=_result>0;
+				if (!_retVal)
+				{
+					_total_occluded++;
+				}
+				cf_wasVisible=_retVal;
+				cf_recheckTimer=10;
+				break;
+			case 64:
+			default:
+				_retVal=true;
+			}
+			glDeleteQueries(1, &cf_queryId);
+			cf_queryId=cf_newQueryId;
+		} else
+		{
+			_retVal=true;
+			glDeleteQueries(1, &cf_queryId);
+			cf_queryId=cf_newQueryId;
+		}
+		return _retVal;
+	}
+
 	bool c3dsObject::cm_Render(c3ds *a_3ds)
 	{
 		bool _retVal=false;
@@ -261,139 +394,50 @@ namespace ns_3ds
 			{
 				if (c3ds::newOGL) // OGL>=1.5
 				{
-					bool _draw=false;
-
-					tUint _query=0;
-					if (cf_wasVisible&&(cf_recheckTimer>0))
+					_total_drawed++;
+					// применение матрицы поворота
+					glMultMatrixf(a_3ds->cf_scaleMatrix);
+					// включение массива вершин
+					glEnableClientState(GL_VERTEX_ARRAY);
+					// включение массива нормалей
+					glEnableClientState(GL_NORMAL_ARRAY);
+					//glPushMatrix(); // save current matrix
+					//glMultMatrixf(localMatrix[i]);
+					for (tUint i=0; i<cf_vertexBufferedCount; i++)
 					{
-						if (cf_queryId!=0)
+						sVertexNormalTex _vertexNormalTex;
+						int _indexCount=cf_vertexVBO[i].sf_count;
+						// привязка буфера
+						glBindBuffer(GL_ARRAY_BUFFER, cf_vertexVBO[i].sf_buffer);
+						// установка указателя на массив вершин по VBO
+						glVertexPointer(3, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)&_vertexNormalTex.sf_coordinate-(char *)&_vertexNormalTex));
+						// установка указателя на массив нормалей по VBO
+						glNormalPointer(GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)&_vertexNormalTex.sf_normal-(char *)&_vertexNormalTex));
+						// включение массива текстурных координат
+						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+						// получение материала
+						c3dsMaterial *_material=cf_vertexVBO[i].sf_material;
+						if (_material)
 						{
-							glDeleteQueries(1, &cf_queryId);
-							cf_queryId=0;
+							_material->cm_Use();
 						}
-						cf_recheckTimer--;
-						_draw=true;
-					} else
-					{
-						if (cf_wasVisible)
-						{
-							if (cf_queryId!=0)
-							{
-								glDeleteQueries(1, &cf_queryId);
-								cf_queryId=0;
-							}
-							cf_wasVisible=false;
-						}
-						glGenQueries(1, &_query);
-						glDepthMask(GL_FALSE);
-						glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-						// включение массива вершин
-						glEnableClientState(GL_VERTEX_ARRAY);
-						glBindBuffer(GL_ARRAY_BUFFER, cf_occluderVBO);
-						sVertex _temp;
-						glVertexPointer(3, GL_FLOAT, sizeof(sVertex), (GLvoid *)((char *)&_temp.sf_coordinate-(char *)&_temp));
-						glBeginQuery(GL_SAMPLES_PASSED, _query);
-						{
-							glDrawArrays(GL_QUADS, 0, 24);
-						}
-						glEndQuery(GL_SAMPLES_PASSED);
-						glDisableClientState(GL_VERTEX_ARRAY);
-						// отключение буфера
-						glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glDepthMask(GL_TRUE);
-						glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-						if (cf_queryId>0)
-						{
-							tUint _resultReady=GL_FALSE;
-							GLenum _error=GL_NO_ERROR;
-							/*while ((_resultReady==GL_FALSE)&&(_error==GL_NO_ERROR))
-							{
-								glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT_AVAILABLE, &_resultReady);
-								_error=glGetError();
-							}*/
-							glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT_AVAILABLE, &_resultReady);
-							_error=glGetError();
-							if(_resultReady!=GL_FALSE)
-							{
-								int _numBitsQuery;
-								glGetQueryiv(GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, &_numBitsQuery);
-								switch(_numBitsQuery)
-								{
-								case 8:
-								case 16:
-								case 32:
-									tUint _result;
-									glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT, &_result);
-									_draw=_result>0;
-									cf_wasVisible=_draw;
-									cf_recheckTimer=10;
-									break;
-								case 64:
-								default:
-									_draw=true;
-								}
-							} else
-							{
-								_draw=true;
-							}
-							glDeleteQueries(1, &cf_queryId);
-							cf_queryId=_query;
-						} else
-						{
-							_draw=true;
-							cf_queryId=_query;
-						}
+						// установка указателя на массив текстурных координат по VBO
+						//GLvoid * tmpK=(GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]);
+						glTexCoordPointer(2, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)&_vertexNormalTex.sf_tex-(char *)&_vertexNormalTex));
+						// отрисовка вершин
+						glDrawArrays(GL_TRIANGLES, 0, _indexCount);
+						glDisable(GL_TEXTURE_2D);
+						// отключение массива текстурных координат
+						glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 					}
-					if (_draw)
-					{
-						_total_drawed++;
-						// применение матрицы поворота
-						glMultMatrixf(a_3ds->cf_scaleMatrix);
-						// включение массива вершин
-						glEnableClientState(GL_VERTEX_ARRAY);
-						// включение массива нормалей
-						glEnableClientState(GL_NORMAL_ARRAY);
-						//glPushMatrix(); // save current matrix
-						//glMultMatrixf(localMatrix[i]);
-						for (tUint i=0; i<cf_vertexBufferedCount; i++)
-						{
-							sVertexNormalTex _vertexNormalTex;
-							int _indexCount=cf_vertexVBO[i].sf_count;
-							// привязка буфера
-							glBindBuffer(GL_ARRAY_BUFFER, cf_vertexVBO[i].sf_buffer);
-							// установка указателя на массив вершин по VBO
-							glVertexPointer(3, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)&_vertexNormalTex.sf_coordinate-(char *)&_vertexNormalTex));
-							// установка указателя на массив нормалей по VBO
-							glNormalPointer(GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)&_vertexNormalTex.sf_normal-(char *)&_vertexNormalTex));
-							// включение массива текстурных координат
-							glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-							// получение материала
-							c3dsMaterial *_material=cf_vertexVBO[i].sf_material;
-							if (_material)
-							{
-								_material->cm_Use();
-							}
-							// установка указателя на массив текстурных координат по VBO
-							//GLvoid * tmpK=(GLvoid *)((char *)indexVertexNormal[i][0].tex-(char *)indexVertexNormal[i]);
-							glTexCoordPointer(2, GL_FLOAT, sizeof(sVertexNormalTex), (GLvoid *)((char *)&_vertexNormalTex.sf_tex-(char *)&_vertexNormalTex));
-							// отрисовка вершин
-							glDrawArrays(GL_TRIANGLES, 0, _indexCount);
-							glDisable(GL_TEXTURE_2D);
-							// отключение массива текстурных координат
-							glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-						}
-						// отключение массива вершин
-						glDisableClientState(GL_VERTEX_ARRAY);
-						// отключение массива нормалей
-						glDisableClientState(GL_NORMAL_ARRAY);
-						// отключение буфера
-						glBindBuffer(GL_ARRAY_BUFFER, 0);
-						// отключение буфера
-						glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-					} else
-					{
-						_total_occluded++;
-					}
+					// отключение массива вершин
+					glDisableClientState(GL_VERTEX_ARRAY);
+					// отключение массива нормалей
+					glDisableClientState(GL_NORMAL_ARRAY);
+					// отключение буфера
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+					// отключение буфера
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 					_retVal=true;
 					//glPopMatrix(); // restore matrix
 				} else // old OGL
@@ -656,11 +700,6 @@ namespace ns_3ds
 		glBufferData(GL_ARRAY_BUFFER, 24*sizeof(sVertex), cf_occluderBuffer, GL_STATIC_DRAW);
 		// отключение буфера
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-
-	bool c3dsObject::cm_OcclusionTest(c3ds *a_3ds)
-	{
-		return true;
 	}
 
 	bool operator<(c3dsObject &a_object, c3dsObject &a_otherObject)

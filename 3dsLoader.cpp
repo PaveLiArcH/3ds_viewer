@@ -172,6 +172,8 @@ namespace ns_3ds
 			return &cm_chunkReaderObjectTrimeshBlock;
 		case(chunks::CAMERA3DS):
 			return &cm_chunkReaderObjectCamera;
+		case(chunks::LIGHT):
+			return &cm_chunkReaderObjectLightBlock;
 		default:
 			return &cm_chunkReaderObjectUnknown;
 		}
@@ -238,6 +240,21 @@ namespace ns_3ds
 		return true;
 	}
 
+	bool c3dsLoader::cm_chunkReaderObjectLightBlock (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{	
+		std::cerr<<"Найден чанк освещения объекта "<<std::hex<<a_header.id<<std::endl;
+		std::streamoff _maxoff=a_istream.tellg();
+		_maxoff=_maxoff+(a_header.len-6);
+		tFloat _position[4];
+		a_istream.read((char*)&(_position[0]),4);
+		a_istream.read((char*)&(_position[2]),4);
+		a_istream.read((char*)&(_position[1]),4);
+		_position[3]=0.0f;
+		a_object.cf_lightingSource.cm_SetPosition(_position);
+		bool _res=cm_chunkReaderObjectLight(a_istream, _maxoff, a_object);
+		return true;
+	}
+
 	bool c3dsLoader::cm_chunkReaderObjectUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
 	{
 		std::cerr<<"Найден неизвестный чанк "<<std::hex<<a_header.id<<" в блоке объектных чанков"<<std::endl;
@@ -251,6 +268,42 @@ namespace ns_3ds
 		return true;
 	}
 	#pragma endregion Объектные чанки
+
+	#pragma region ObjectLightingChunks
+	ptChunkReaderObjectLight c3dsLoader::cm_getChunkReaderObjectLight(s3dsHeader & a_header)
+	{
+		switch (a_header.id)
+		{
+		default:
+			return &cm_chunkReaderObjectLightUnknown;
+		}
+	}
+
+	bool c3dsLoader::cm_chunkReaderObjectLight (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object)
+	{
+		s3dsHeader _header;
+		bool _res;
+		while ((a_istream.tellg()<a_maxoffset)&&!(a_istream.fail()||a_istream.eof()||((a_istream>>_header).eof())))
+		{
+			ptChunkReaderObjectLight _chunkReaderObjectLight=cm_getChunkReaderObjectLight(_header);
+			_res=(*_chunkReaderObjectLight)(a_istream, _header, a_object);
+		}
+		return true;
+	}
+
+	bool c3dsLoader::cm_chunkReaderObjectLightUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object)
+	{
+		std::cerr<<"Найден неизвестный чанк "<<std::hex<<a_header.id<<" в блоке чанков освещения"<<std::endl;
+		if (a_header.len<6)
+		{
+			std::cerr<<"\tНекорректная длина чанка"<<std::endl;
+			// TODO throw an exception
+			return false;
+		}
+		a_istream.seekg(a_header.len-6, std::ios::cur);
+		return true;
+	}
+	#pragma endregion Объектные чанки освещения
 	
 	#pragma region ObjectTrimeshChunks
 	bool c3dsLoader::cm_chunkReaderObjectTrimesh (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object)

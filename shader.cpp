@@ -4,7 +4,6 @@
 #include <vector>
 #include "stdafx.h"
 #include "shader.h"
-#include "vertex.h"
 
 using namespace std;
 

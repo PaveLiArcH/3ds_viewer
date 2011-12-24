@@ -35,6 +35,26 @@ namespace ns_3ds
 	{
 		cf_unit=1.0f;
 		cm_SetScale(1.0);
+		tFloat _ambLig1[4]={
+			0.4f,0.4f,0.4f,1.0f
+		};
+		tFloat _difLig1[4]={
+			0.8f,0.8f,0.8f,1.0f
+		};
+		tFloat _speLig1[4]={
+			0.7f,0.7f,0.7f,0.9f
+		};
+		tFloat _posLig1[4]={
+			-2*5,10.0f,-2*5,1.0f
+		};
+		tFloat _dirLig1[3]={
+			0.0f,0.0f,-1.0f
+		};
+		cf_lightingSource.cm_SetAmbient(_ambLig1);
+		cf_lightingSource.cm_SetDiffuse(_difLig1);
+		cf_lightingSource.cm_SetSpecular(_speLig1);
+		cf_lightingSource.cm_SetPosition(_posLig1);
+		cf_lightingSource.cm_SetSpotDirection(_dirLig1);
 	}
 
 	// конструктор по умолчанию
@@ -73,21 +93,40 @@ namespace ns_3ds
 
 	void c3ds::render(int filterMode)
 	{
-		vector<c3dsObject *> _vector;
-		for (std::size_t i=0; i<cf_object.size(); i++)
+		cf_lightingSource.cm_Use();
+		if (isDirty)
 		{
-			if (cf_object[i]->cm_FrustumTest(this))
+			cf_objectsRendering.clear();
+			for (std::size_t i=0; i<cf_object.size(); i++)
 			{
-				_vector.push_back(cf_object[i]);
-			} else
+				if (cf_object[i]->cm_FrustumTest(this))
+				{
+					cf_objectsRendering.push_back(cf_object[i]);
+				} else
+				{
+					_total_frustumed++;
+				}
+			}
+			sort(cf_objectsRendering.begin(), cf_objectsRendering.end(), Compare3dsObjects);
+		}
+		vector <c3dsObject *> _recheck;
+		for (std::size_t i=0; i<cf_objectsRendering.size(); i++)
+		{
+			int _result=cf_objectsRendering[i]->cm_OcclusionTest(this);
+			if (_result>0)
 			{
-				_total_frustumed++;
+				cf_objectsRendering[i]->cm_Render(this);
+			} else if (_result<0)
+			{
+				_recheck.push_back(cf_objectsRendering[i]);
 			}
 		}
-		sort(_vector.begin(), _vector.end(), Compare3dsObjects);
-		for (std::size_t i=0; i<_vector.size(); i++)
+		for (std::size_t i=0; i<_recheck.size(); i++)
 		{
-			_vector[i]->cm_Render(this);
+			if (_recheck[i]->cm_OcclusionRecheck())
+			{
+				_recheck[i]->cm_Render(this);
+			}
 		}
 	}
 

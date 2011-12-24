@@ -17,6 +17,7 @@ namespace ns_3ds
 	typedef bool (*ptChunkReaderObject) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 	typedef bool (*ptChunkReaderObjectTrimesh) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 	typedef bool (*ptChunkReaderObjectTrimeshFace) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
+	typedef bool (*ptChunkReaderObjectLight) (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 	typedef bool (*ptChunkReaderMap) (tistream & a_istream, s3dsHeader & a_header, c3dsMap *a_map);
 	class c3dsLoader
 	{
@@ -43,8 +44,15 @@ namespace ns_3ds
 		static bool cm_chunkReaderObjectExternalProcessed (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		static bool cm_chunkReaderObjectTrimeshBlock (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		static bool cm_chunkReaderObjectCamera (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
+		static bool cm_chunkReaderObjectLightBlock (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		static bool cm_chunkReaderObjectUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
 		#pragma endregion Объектные чанки
+
+		#pragma region ObjectLightingChunks
+		static ptChunkReaderObjectLight cm_getChunkReaderObjectLight(s3dsHeader & a_header);
+		static bool cm_chunkReaderObjectLight (tistream & a_istream, std::streamoff & a_maxoffset, c3ds & a_object);
+		static bool cm_chunkReaderObjectLightUnknown (tistream & a_istream, s3dsHeader & a_header, c3ds & a_object);
+		#pragma endregion Объектные чанки освещения
 
 		#pragma region ObjectTrimeshChunks
 		static ptChunkReaderObjectTrimesh cm_getChunkReaderObjectTrimesh(s3dsHeader & a_header);

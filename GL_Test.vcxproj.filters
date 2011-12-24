@@ -54,6 +54,9 @@
     <ClCompile Include="3dsCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="3dsLightingSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GLee.h">
@@ -63,9 +66,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vkscancodes.h">
@@ -117,6 +117,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="3dsCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="3dsLightingSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

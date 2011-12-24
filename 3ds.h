@@ -14,11 +14,11 @@
 //glut
 #include "glut.h"
 //self implemented
-#include "vertex.h"
 #include "3dsTypes.h"
 #include "3dsLoader.h"
 #include "3dsVertex.h"
 #include "3dsTextureDevIL.h"
+#include "3dsLightingSource.h"
 
 #include "3dsCamera.h"
 
@@ -30,6 +30,7 @@ namespace ns_3ds
 	class c3dsMaterial;
 	class c3dsObject;
 	//class c3dsCamera;
+	class c3dsLightingSource;
 
 	class c3ds
 	{
@@ -50,10 +51,12 @@ namespace ns_3ds
 		tFloat cf_scaleMatrix[16];
 		// объекты
 		vector<c3dsObject *> cf_object;
+		vector<c3dsObject *> cf_objectsRendering;
 		static bool newOGL, hasVBO, hasQueries, hasNVConditional;
 		// инициализация
 		void init();
 		c3dsCamera cf_camera;
+		c3dsLightingSource cf_lightingSource;
 	public:
 		// конструктор по умолчанию
 		c3ds();

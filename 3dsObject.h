@@ -72,6 +72,7 @@ namespace ns_3ds
 		sVertex *cf_occluderBuffer;
 		tUint cf_occluderVBO;
 		tUint cf_queryId;
+		tUint cf_newQueryId;
 		tUint cf_recheckTimer;
 		bool cf_wasVisible;
 		// occluder common data
@@ -96,7 +97,8 @@ namespace ns_3ds
 		bool cm_Buffer(c3ds *a_3ds);
 		bool cm_Render(c3ds *a_3ds);
 		bool cm_FrustumTest(c3ds *a_3ds);
-		bool cm_OcclusionTest(c3ds *a_3ds);
+		int cm_OcclusionTest(c3ds *a_3ds);
+		bool cm_OcclusionRecheck();
 		void cm_ScaleChanged(tDouble a_newScale);
 		void cm_RecalcFrustum(tDouble a_newScale);
 		void cm_RecalcOccluder(tDouble a_newScale);

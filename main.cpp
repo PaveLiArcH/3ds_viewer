@@ -14,13 +14,13 @@
 //self implemented
 #include "stdafx.h"
 #include "vkscancodes.h"
-#include "vertex.h"
 #include "3ds.h"
 #include "shader.h"
 
 #include "3dsMaterial.h"
 #include "3dsVertex.h"
 #include "3dsTextureDevIL.h"
+#include "3dsLightingSource.h"
 
 using ns_3ds::sVertexColor;
 
@@ -49,53 +49,12 @@ sVertexColor axes[]={
 	sVertexColor(0.0,surfaceSpace,0.0,0.0,0.0,1.0),
 };
 
-GLfloat ambMat[4]={
-	0.4f,0.4f,0.4f,1.0f
-};
-GLfloat ambLig1[4]={
-	0.4f,0.4f,0.4f,1.0f
-};
-GLfloat ambLig2[4]={
-	0.0f,0.4f,0.0f,1.0f
-};
-GLfloat difMat[4]={
-	0.8f,0.8f,0.8f,1.0f
-};
-GLfloat difLig1[4]={
-	0.8f,0.8f,0.8f,1.0f
-};
-GLfloat difLig2[4]={
-	0.0f,0.8f,0.0f,1.0f
-};
-GLfloat speMat[4]={
-	0.4f,0.4f,0.4f,1.0f
-};
-GLfloat speLig1[4]={
-	0.7f,0.7f,0.7f,0.9f
-};
-GLfloat speLig2[4]={
-	0.0f,0.7f,0.0f,0.9f
-};
-GLfloat posLig1[4]={
-	-2*surfaceSpace,10.0f,-2*surfaceSpace,1.0f
-};
-GLfloat posLig2[4]={
-	2*surfaceSpace,10.0f,2*surfaceSpace,1.0f
-};
-GLfloat dirLig1[3]={
-	0.0f,0.0f,-1.0f
-};
-GLfloat dirLig2[3]={
-	0.0f,0.0f,-1.0f
-};
 ILuint devilError;
 
 ns_3ds::c3ds *object;
 bool newOGL=false,hasVBO=false,hasFragmentShader=false,hasVertexShader=false;
 
 shader modelShader;
-lightSource firstLight=lightSource(ambLig1,difLig1,speLig1,posLig1,dirLig1);
-lightSource secondLight=lightSource(ambLig2,difLig2,speLig2,posLig2,dirLig2);
 
 // посимвольная отрисовка строки шрифтом font
 void renderBitmapString(float x, float y, void *font, char *string)
@@ -198,7 +157,7 @@ void display (void)
 	// позиция камеры
 	glMultMatrixd(object->cm_GetCamera()->getPosition());
 
-	firstLight.use();
+	//firstLight.use();
 	//secondLight.use(GL_LIGHT1);
 
 	bool shaderOk=modelShader.activate();
@@ -217,17 +176,14 @@ void display (void)
 
 	glCullFace(GL_BACK);
 
-	// смена переднего и заднего буферов
-	glutSwapBuffers();
-};
-
-void displayOverlay(void)
-{
 	if (isDrawingFps)
 	{
 		drawFps();
 	}
-}
+
+	// смена переднего и заднего буферов
+	glutSwapBuffers();
+};
 
 // функция, вызываемая при изменении размеров окна
 void reshape (int w, int h)
@@ -272,6 +228,17 @@ void onIdle()
 	} else
 	{
 		glutSwapBuffers();
+		_frames_drawed--;
+		_frames_drawed--;
+		frame++;
+		_time=glutGet(GLUT_ELAPSED_TIME);
+		if (_time - timebase > 1000)
+		{
+			_lastFps=frame*1000.0/(_time-timebase);
+			timebase = _time;
+			frame = 0;
+			//printf("%s\n",s);
+		}
 	}
 	if (isDrawingFps)
 	{
@@ -601,10 +568,6 @@ void wmain (int argc, wchar_t **argv)
 
 	// 4. устанавливаем функцию, которая будет вызываться для перерисовки окна
 	glutDisplayFunc(display);
-	if (_overlaySupport)
-	{
-		glutOverlayDisplayFunc(displayOverlay);
-	}
 	// 5. устанавливаем функцию, которая будет вызываться при изменении размеров окна
 	glutReshapeFunc(reshape);
 	//// 6. устанавливаем таймер для перерисовки окна по времени

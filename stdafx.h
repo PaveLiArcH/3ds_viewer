@@ -33,5 +33,6 @@ extern int _total_occluded;
 
 extern int texturingEnabled;
 extern int _total_drawed;
+extern bool isDirty;
 
 #endif

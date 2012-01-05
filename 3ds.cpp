@@ -96,6 +96,7 @@ namespace ns_3ds
 		cf_lightingSource.cm_Use();
 		if (isDirty)
 		{
+			_total_frustumed=0;
 			cf_objectsRendering.clear();
 			for (std::size_t i=0; i<cf_object.size(); i++)
 			{

@@ -120,7 +120,6 @@ void drawFps()
 // в том числе и принудительно, по командам glutPostRedisplay
 void display (void)
 {
-	_total_frustumed=0;
 	_total_occluded=0;
 	_total_drawed=0;
 	_frames_drawed++;

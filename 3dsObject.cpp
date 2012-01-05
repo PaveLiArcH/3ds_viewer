@@ -264,7 +264,7 @@ namespace ns_3ds
 					glDeleteQueries(1, &cf_queryId);
 					cf_queryId=0;
 				}
-				cf_checkTimer=glm::log2((float)a_number);
+				cf_checkTimer=glm::log2((float)(a_number+1));
 			}
 			if (cf_occlusionTestPassed)
 			{
@@ -308,15 +308,18 @@ namespace ns_3ds
 						{
 							int _numBitsQuery;
 							glGetQueryiv(GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, &_numBitsQuery);
-							tUint _result;
+							unsigned long long _result=0;
 							switch(_numBitsQuery)
 							{
 							case 8:
 							case 16:
 							case 32:
-								glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT, &_result);
+								glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT, (GLuint *)&_result);
 								break;
 							case 64:
+								//glGetQueryObjectui64vEXT(cf_queryId, GL_QUERY_RESULT, &_result);
+								glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT, (GLuint *)&_result);
+								break;
 							default:
 								_result=1;
 								break;

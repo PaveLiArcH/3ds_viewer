@@ -112,7 +112,7 @@ namespace ns_3ds
 		}
 		for (std::size_t i=0; i<cf_objectsRendering.size(); i++)
 		{
-			int _result=cf_objectsRendering[i]->cm_OcclusionTest(this);
+			int _result=cf_objectsRendering[i]->cm_OcclusionTest(this, i);
 			if (_result>0)
 			{
 				cf_objectsRendering[i]->cm_Render(this);

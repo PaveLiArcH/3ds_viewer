@@ -24,6 +24,7 @@ namespace ns_3ds
 		cf_wasVisible=false;
 		cf_queryId=0;
 		cf_occlusionTestPassed=false;
+		cf_checkTimer=1;
 	}
 
 	c3dsObject::~c3dsObject()
@@ -250,7 +251,7 @@ namespace ns_3ds
 		return _retVal;
 	}
 
-	int c3dsObject::cm_OcclusionTest(c3ds *a_3ds)
+	int c3dsObject::cm_OcclusionTest(c3ds *a_3ds, int a_number)
 	{
 		int _draw=0;
 		if (!cf_hidden)
@@ -263,6 +264,7 @@ namespace ns_3ds
 					glDeleteQueries(1, &cf_queryId);
 					cf_queryId=0;
 				}
+				cf_checkTimer=glm::log2((float)a_number);
 			}
 			if (cf_occlusionTestPassed)
 			{
@@ -270,59 +272,66 @@ namespace ns_3ds
 				_total_occluded+=!cf_wasVisible;
 			} else
 			{
-				if (cf_queryId==0)
+				if (cf_checkTimer>0)
 				{
-					glGenQueries(1, &cf_queryId);
-					glDepthMask(GL_FALSE);
-					glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-					// включение массива вершин
-					glEnableClientState(GL_VERTEX_ARRAY);
-					glBindBuffer(GL_ARRAY_BUFFER, cf_occluderVBO);
-					sVertex _temp;
-					glVertexPointer(3, GL_FLOAT, sizeof(sVertex), (GLvoid *)((char *)&_temp.sf_coordinate-(char *)&_temp));
-					glBeginQuery(GL_SAMPLES_PASSED, cf_queryId);
-					{
-						glDrawArrays(GL_QUADS, 0, 24);
-					}
-					glEndQuery(GL_SAMPLES_PASSED);
-					glDisableClientState(GL_VERTEX_ARRAY);
-					// отключение буфера
-					glBindBuffer(GL_ARRAY_BUFFER, 0);
-					glDepthMask(GL_TRUE);
-					glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-					// отрисуем, проверять будем только в следующем кадре
+					cf_checkTimer--;
 					_draw=1;
 				} else
 				{
-					tUint _resultReady=GL_FALSE;
-					glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT_AVAILABLE, &_resultReady);
-					if(_resultReady!=GL_FALSE)
+					if (cf_queryId==0)
 					{
-						int _numBitsQuery;
-						glGetQueryiv(GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, &_numBitsQuery);
-						tUint _result;
-						switch(_numBitsQuery)
+						glGenQueries(1, &cf_queryId);
+						glDepthMask(GL_FALSE);
+						glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+						// включение массива вершин
+						glEnableClientState(GL_VERTEX_ARRAY);
+						glBindBuffer(GL_ARRAY_BUFFER, cf_occluderVBO);
+						sVertex _temp;
+						glVertexPointer(3, GL_FLOAT, sizeof(sVertex), (GLvoid *)((char *)&_temp.sf_coordinate-(char *)&_temp));
+						glBeginQuery(GL_SAMPLES_PASSED, cf_queryId);
 						{
-						case 8:
-						case 16:
-						case 32:
-							glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT, &_result);
-							break;
-						case 64:
-						default:
-							_result=1;
-							break;
+							glDrawArrays(GL_QUADS, 0, 24);
 						}
-						_draw=_result;
-						cf_wasVisible=_draw;
-						_total_occluded+=!cf_wasVisible;
-						cf_occlusionTestPassed=true;
-						glDeleteQueries(1, &cf_queryId);
-						cf_queryId=0;
+						glEndQuery(GL_SAMPLES_PASSED);
+						glDisableClientState(GL_VERTEX_ARRAY);
+						// отключение буфера
+						glBindBuffer(GL_ARRAY_BUFFER, 0);
+						glDepthMask(GL_TRUE);
+						glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+						// отрисуем, проверять будем только в следующем кадре
+						_draw=1;
 					} else
 					{
-						// результат не готов, отрисовываем
-						_draw=1;
+						tUint _resultReady=GL_FALSE;
+						glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT_AVAILABLE, &_resultReady);
+						if(_resultReady!=GL_FALSE)
+						{
+							int _numBitsQuery;
+							glGetQueryiv(GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, &_numBitsQuery);
+							tUint _result;
+							switch(_numBitsQuery)
+							{
+							case 8:
+							case 16:
+							case 32:
+								glGetQueryObjectuiv(cf_queryId, GL_QUERY_RESULT, &_result);
+								break;
+							case 64:
+							default:
+								_result=1;
+								break;
+							}
+							_draw=_result;
+							cf_wasVisible=_draw;
+							_total_occluded+=!cf_wasVisible;
+							cf_occlusionTestPassed=true;
+							glDeleteQueries(1, &cf_queryId);
+							cf_queryId=0;
+						} else
+						{
+							// результат не готов, отрисовываем
+							_draw=1;
+						}
 					}
 				}
 			}

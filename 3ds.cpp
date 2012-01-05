@@ -109,23 +109,12 @@ namespace ns_3ds
 			}
 			sort(cf_objectsRendering.begin(), cf_objectsRendering.end(), Compare3dsObjects);
 		}
-		vector <c3dsObject *> _recheck;
 		for (std::size_t i=0; i<cf_objectsRendering.size(); i++)
 		{
 			int _result=cf_objectsRendering[i]->cm_OcclusionTest(this);
 			if (_result>0)
 			{
 				cf_objectsRendering[i]->cm_Render(this);
-			} else if (_result<0)
-			{
-				_recheck.push_back(cf_objectsRendering[i]);
-			}
-		}
-		for (std::size_t i=0; i<_recheck.size(); i++)
-		{
-			if (_recheck[i]->cm_OcclusionRecheck())
-			{
-				_recheck[i]->cm_Render(this);
 			}
 		}
 	}

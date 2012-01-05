@@ -183,6 +183,7 @@ void display (void)
 
 	// смена переднего и заднего буферов
 	glutSwapBuffers();
+	isDirty=false;
 };
 
 // функция, вызываемая при изменении размеров окна
@@ -223,7 +224,7 @@ void onIdle()
 		{
 			_frames_drawed=0;
 		}
-		isDirty=false;
+		//isDirty=false;
 		glutPostRedisplay();
 	} else
 	{
